@@ -40,7 +40,7 @@
         </activity>
 
         <activity
-            android:name="com.basti12354.accelerometer.SuperClass"
+            android:name=".AndroidSensorsActivity"
             android:parentActivityName="com.basti12354.accelerometer.MainActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden">

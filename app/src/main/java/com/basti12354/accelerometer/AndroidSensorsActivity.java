@@ -44,7 +44,7 @@ import java.util.Date;
 /**
  * Created by Basti on 13.04.2016.
  */
-public class SuperClass  extends ExternalSensorsActivity implements SensorEventListener {
+public class AndroidSensorsActivity extends ExternalSensorsActivity implements SensorEventListener {
 
 
 

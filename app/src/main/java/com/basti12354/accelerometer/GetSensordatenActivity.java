@@ -1,12 +1,6 @@
 package com.basti12354.accelerometer;
 
-import android.content.Context;
-import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Vibrator;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -15,7 +9,7 @@ import android.widget.TextView;
 /**
  * Created by Basti on 13.04.2016.
  */
-public class GetSensordatenActivity extends SuperClass implements View.OnClickListener {
+public class GetSensordatenActivity extends AndroidSensorsActivity implements View.OnClickListener {
     Button startBtn, stopBtn;
     TextView aktuellerSatz;
     Boolean isRunning = false;
@@ -63,7 +57,7 @@ public class GetSensordatenActivity extends SuperClass implements View.OnClickLi
                     stopSensors();
 
                     // Erhöhe den Zähler um eins!
-                    SuperClass.aktuellerSatz = SuperClass.aktuellerSatz + 1;
+                    AndroidSensorsActivity.aktuellerSatz = AndroidSensorsActivity.aktuellerSatz + 1;
                     setTextViewAktuellerSatz();
 
                     isRunning = false;
@@ -78,6 +72,6 @@ public class GetSensordatenActivity extends SuperClass implements View.OnClickLi
 
     private void setTextViewAktuellerSatz(){
         aktuellerSatz = (TextView) findViewById(R.id.satz);
-        aktuellerSatz.setText(SuperClass.aktuellerSatz + "");
+        aktuellerSatz.setText(AndroidSensorsActivity.aktuellerSatz + "");
     }
 }
