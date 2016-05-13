@@ -35,8 +35,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     private MetaWearBoard mwBoard, mwBoard2, mwBoard3, mwBoard4;
 
 
-    private final String LOG = "Externe Sensoren";
+    public final String LOG = "Externe Sensoren";
 
+    private boolean sensor1, sensor2, sensor3, sensor4;
 
 
 
@@ -152,6 +153,8 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                     accelModule.enableAxisSampling();
                     // Switch the accelerometer to active mode
                     accelModule.start();
+
+                    sensor1 = true;
                     break;
 
                 case 2:
@@ -165,6 +168,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                     accelModule2.enableAxisSampling();
                     // Switch the accelerometer to active mode
                     accelModule2.start();
+                    sensor2 = true;
                     break;
                 case 3:
                     break;
@@ -204,25 +208,50 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     public void getAccDataFromExtern(){
         final String acc1 = "acc_stream_key";
+        final String acc2 = "acc_stream_key2";
 
-        accelModule.routeData().fromAxes().stream(acc1).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
-            @Override
-            public void success(RouteManager result) {
-                result.subscribe(acc1, new RouteManager.MessageHandler() {
+
+                accelModule.routeData().fromAxes().stream(acc1).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
                     @Override
-                    public void process(Message message) {
-                        CartesianFloat axes = message.getData(CartesianFloat.class);
-                        Log.i(acc1, message.getData(CartesianFloat.class).toString());
-                        extAccX = axes.x();
-                        extAccY = axes.y();
-                        extAccZ = axes.z();
+                    public void success(RouteManager result) {
+                        result.subscribe(acc1, new RouteManager.MessageHandler() {
+                            @Override
+                            public void process(Message message) {
+                                CartesianFloat axes = message.getData(CartesianFloat.class);
+                                Log.i(acc1, message.getData(CartesianFloat.class).toString());
+                                extAccX = axes.x();
+                                extAccY = axes.y();
+                                extAccZ = axes.z();
+                            }
+                        });
+
                     }
                 });
 
-            }
-        });
+                accelModule2.routeData().fromAxes().stream(acc2).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+                    @Override
+                    public void success(RouteManager result) {
+                        result.subscribe(acc2, new RouteManager.MessageHandler() {
+                            @Override
+                            public void process(Message message) {
+                                CartesianFloat axes = message.getData(CartesianFloat.class);
+                                Log.i(acc2, message.getData(CartesianFloat.class).toString());
+                                extAccX2 = axes.x();
+                                extAccY2 = axes.y();
+                                extAccZ2 = axes.z();
+                            }
+                        });
 
+                    }
+                });
 
+    }
+
+    public boolean checkIfSensorsAreReady(){
+        if (sensor1 && sensor2) {
+            return true;
+        }
+        else return false;
     }
 
 

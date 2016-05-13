@@ -410,6 +410,11 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         @Override
         public void run() {
             try {
+                if (checkIfSensorsAreReady()){
+                    getAccDataFromExtern();
+                    Log.i(LOG, "Externe Sensoren sind ALLE bereit!");
+                }
+
 
                 // Speichere die aktuellen Daten zur Arraylist
                 saveSensorDataAndActualTimeToArray();

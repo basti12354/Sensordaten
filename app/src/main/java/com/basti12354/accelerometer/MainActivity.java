@@ -4,6 +4,7 @@ package com.basti12354.accelerometer;
  * Created by Basti on 23.03.2016.
  */
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,10 +25,15 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public static String probandenName;
     public static String label;
 
+    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Starte das Bluetooth automatisch!
+        startBluetooth();
 
         //ListView
         String [] andereWorkouts = getResources().getStringArray(R.array.uebungen);
@@ -49,8 +55,13 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         probandenName = editText.getText().toString();
 
         if (probandenName.length() > 0){
-            Intent intent = new Intent(view.getContext(), GetSensordatenActivity.class);
-            startActivity(intent);
+            if (mBluetoothAdapter.isEnabled()) {
+                Intent intent = new Intent(view.getContext(), GetSensordatenActivity.class);
+                startActivity(intent);
+            }
+            else {
+                Toast.makeText(MainActivity.this, "WARTE AUF BLUETOOTH! BITTE GLEICH NOCHMAL KLICKEN!", Toast.LENGTH_SHORT).show();
+            }
 
 
             switch (position){
@@ -100,6 +111,18 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         return true;
+    }
+
+    private void startBluetooth(){
+
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+            Log.i("BT: ", "Bluetooth was succesfully started!");
+        }
     }
 }
 
