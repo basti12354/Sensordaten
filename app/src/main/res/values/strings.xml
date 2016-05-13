@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Accelerometer</string>
+
+    <string-array name="uebungen">
+        <item>Push Up</item>
+        <item>Lunge</item>
+        <item>Crunch</item>
+        <item>Jumping Jack</item>
+        <item>Donkey Kick</item>
+
+        <item>Squat</item>
+        <item>Mountain Climber</item>
+        <item>Bicycle Crunch</item>
+        <item>Russian Twist</item>
+        <item>Burpees</item>
+    </string-array>
+</resources>
