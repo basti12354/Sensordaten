@@ -19,7 +19,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.exercise_layout);
 
-        initializeViews();
+      //  initializeViews();
 
         intitializeSmartphoneSensors();
 

@@ -58,7 +58,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     private float deltaY = 0;
     private float deltaZ = 0;
     public float vibrateThreshold = 0;
-    private TextView currentX, currentY, currentZ;
+ //   private TextView currentX, currentY, currentZ;
     public Vibrator v;
 
     // Linear ACC
@@ -68,7 +68,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     private float gyroX;
     private float gyroY;
     private float gyroZ;
-    private TextView currentGyroX, currentGyroY, currentGyroZ;
+  //  private TextView currentGyroX, currentGyroY, currentGyroZ;
 
 
     // Orientation -> Azimut, Pitch, Roll
@@ -118,16 +118,16 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
     }
 
-    public void initializeViews() {
-        currentX = (TextView) findViewById(R.id.currentX);
-        currentY = (TextView) findViewById(R.id.currentY);
-        currentZ = (TextView) findViewById(R.id.currentZ);
-
-        currentGyroX = (TextView) findViewById(R.id.gyroX);
-        currentGyroY = (TextView) findViewById(R.id.gyroY);
-        currentGyroZ = (TextView) findViewById(R.id.gyroZ);
-
-    }
+//    public void initializeViews() {
+//        currentX = (TextView) findViewById(R.id.currentX);
+//        currentY = (TextView) findViewById(R.id.currentY);
+//        currentZ = (TextView) findViewById(R.id.currentZ);
+//
+//        currentGyroX = (TextView) findViewById(R.id.gyroX);
+//        currentGyroY = (TextView) findViewById(R.id.gyroY);
+//        currentGyroZ = (TextView) findViewById(R.id.gyroZ);
+//
+//    }
 
     public void intitializeSmartphoneSensors(){
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -245,9 +245,9 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
             //######### Accelerometer #############
             case Sensor.TYPE_ACCELEROMETER:
                 // clean current values
-                displayCleanValues();
+               // displayCleanValues();
                 // display the current x,y,z accelerometer values
-                displayCurrentValues();
+               // displayCurrentValues();
 
                 deltaX = event.values[0];
                 deltaY = event.values[1];
@@ -271,10 +271,10 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
                 gyroY = event.values[1];
                 gyroZ = event.values[2];
 
-                // Zeige Änderungen auf Display
-                currentGyroX.setText(Float.toString(gyroX));
-                currentGyroY.setText(Float.toString(gyroY));
-                currentGyroZ.setText(Float.toString(gyroZ));
+//                // Zeige Änderungen auf Display
+//                currentGyroX.setText(Float.toString(gyroX));
+//                currentGyroY.setText(Float.toString(gyroY));
+//                currentGyroZ.setText(Float.toString(gyroZ));
 
             break;
 
@@ -313,18 +313,18 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
     }
 
-    public void displayCleanValues() {
-        currentX.setText("0.0");
-        currentY.setText("0.0");
-        currentZ.setText("0.0");
-    }
-
-    // display the current x,y,z accelerometer values
-    public void displayCurrentValues() {
-        currentX.setText(Float.toString(deltaX));
-        currentY.setText(Float.toString(deltaY));
-        currentZ.setText(Float.toString(deltaZ));
-    }
+//    public void displayCleanValues() {
+//        currentX.setText("0.0");
+//        currentY.setText("0.0");
+//        currentZ.setText("0.0");
+//    }
+//
+//    // display the current x,y,z accelerometer values
+//    public void displayCurrentValues() {
+//        currentX.setText(Float.toString(deltaX));
+//        currentY.setText(Float.toString(deltaY));
+//        currentZ.setText(Float.toString(deltaZ));
+//    }
 
     private void saveSensorDataAndActualTimeToArray(){
 
@@ -334,14 +334,30 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         Long tsLong = System.currentTimeMillis();
         String timestamp = tsLong.toString();
 
+        Log.i("EXTERNE SENSORDATEN", timestamp + ": " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
+                + "," + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
+                + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
+                + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2));
 
         sensorData.add(label + "," + timestamp + "," + Float.toString(deltaX) + "," + Float.toString(deltaY) + "," + Float.toString(deltaZ)
                 + "," + Float.toString(gyroX) + "," + Float.toString(gyroY) + "," + Float.toString(gyroZ)
                 + "," + Float.toString(linearAccX) + "," + Float.toString(linearAccY) + "," + Float.toString(linearAccZ)
                 + "," + Float.toString(mAzimuth)+ "," + Float.toString(mPitch)+ "," + Float.toString(mRoll)
                 + "," + Float.toString(rotationVectorX)+ "," + Float.toString(rotationVectorY)+ "," + Float.toString(rotationVectorZ)
+                + "," + Float.toString(distance) + "," + aktuellerSatz
 
-                + "," + Float.toString(distance) + "," + aktuellerSatz);
+                // Externe AccSensoren
+                + "," + Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
+                + "," + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
+                + "," + Float.toString(ExternalSensorsActivity.extAccX3)+ "," + Float.toString(ExternalSensorsActivity.extAccY3)+ "," + Float.toString(ExternalSensorsActivity.extAccZ3)
+                + "," + Float.toString(ExternalSensorsActivity.extAccX4)+ "," + Float.toString(ExternalSensorsActivity.extAccY4)+ "," + Float.toString(ExternalSensorsActivity.extAccZ4)
+
+                // Extern Gyro
+                + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
+                + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2)
+                + "," + Float.toString(ExternalSensorsActivity.extGyroX3)+ "," + Float.toString(ExternalSensorsActivity.extGyroY3)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ3)
+                + "," + Float.toString(ExternalSensorsActivity.extGyroX4)+ "," + Float.toString(ExternalSensorsActivity.extGyroY4)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ4)
+                );
 
        // Log.d("Proximity", distance + "");
     //    Log.d("Linear", linearAccX + "," + linearAccY +  "," + linearAccZ);
@@ -410,11 +426,10 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         @Override
         public void run() {
             try {
-                if (checkIfSensorsAreReady()){
-                    getAccDataFromExtern();
-                    Log.i(LOG, "Externe Sensoren sind ALLE bereit!");
-                }
+                changeColorOfTextViews();
 
+                // Hole mir alle Daten der Externen -> falls diese nicht bereit sind => 0 wird geliefert!
+                getAccDataFromExtern();
 
                 // Speichere die aktuellen Daten zur Arraylist
                 saveSensorDataAndActualTimeToArray();
@@ -501,6 +516,11 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         return super.onCreateOptionsMenu(menu);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        closeExternalSensors();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -510,6 +530,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
                 finish();
                 Intent intent  = new Intent(this, MainActivity.class);
                 startActivity(intent);
+
+                closeExternalSensors();
                     break;
 
             case R.id.video:
