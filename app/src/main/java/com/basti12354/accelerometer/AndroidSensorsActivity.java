@@ -334,7 +334,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         Long tsLong = System.currentTimeMillis();
         String timestamp = tsLong.toString();
 
-        Log.i("EXTERNE SENSORDATEN", timestamp + ": " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
+        Log.i( LOG + " DATEN", timestamp + ": " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
                 + "," + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
                 + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
                 + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2));
@@ -409,7 +409,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
     public void printArrayList(){
         for (int i = 0; i < sensorData.size(); i ++){
-            Log.d("Arraylist-Inhalt", sensorData.get(i));
+            Log.d(LOG + " List", sensorData.get(i));
         }
     }
 
@@ -516,39 +516,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        closeExternalSensors();
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            case android.R.id.home:
-                finish();
-                Intent intent  = new Intent(this, MainActivity.class);
-                startActivity(intent);
-
-                closeExternalSensors();
-                    break;
-
-            case R.id.video:
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
-
-                    playVideo();
-                  //  Log.d("Test", "Click");
-
-
-
-                break;
-
-
-        }
-        return true;
-    }
 
 
 

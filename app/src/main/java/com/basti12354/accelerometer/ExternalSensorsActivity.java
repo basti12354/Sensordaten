@@ -36,6 +36,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     public static float extAccX = 0, extAccY = 0, extAccZ = 0, extAccX2 = 0, extAccY2 = 0, extAccZ2 = 0,
             extAccX3 = 0, extAccY3 = 0, extAccZ3 = 0, extAccX4 = 0, extAccY4 = 0, extAccZ4 = 0;
 
+    private String[] accDataTransferString = {"acc_stream_key1", "acc_stream_key2", "acc_stream_key3","acc_stream_key4"};
+    private String[] gyroDataTransferString = {"gyro_stream_key1", "gyro_stream_key2", "gyro_stream_key3","gyro_stream_key4"};
+
     public static float extGyroX = 0, extGyroY = 0, extGyroZ = 0, extGyroX2 = 0, extGyroY2 = 0, extGyroZ2 = 0,
             extGyroX3 = 0, extGyroY3 = 0, extGyroZ3 = 0, extGyroX4 = 0, extGyroY4 = 0, extGyroZ4 = 0;
 
@@ -86,7 +89,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         // Typecast the binder to the service's LocalBinder class
         serviceBinder = (MetaWearBleService.LocalBinder) service;
 
-         Log.i(LOG, "Service Bind2");
+
+
+
+         Log.i(LOG, "Service Bind2" );
 
         // Replace with boards MAC Adress
         final String mwMacAddress = "D1:C4:AA:BF:0B:22";
@@ -101,18 +107,22 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
         for (int i = 0; i < anzahl_der_externen_sensoren; i++) {
 
-            BluetoothDevice btDevice = btManager.getAdapter().getRemoteDevice(macAdressen.get(i));
+            final int numberOfConnectedDevices = i;
+
+
+
+            BluetoothDevice btDevice = btManager.getAdapter().getRemoteDevice(macAdressen.get(numberOfConnectedDevices));
             final MetaWearBoard metaWearBoard = serviceBinder.getMetaWearBoard(btDevice);
 
 
-            final int zahl = i;
+
 
             metaWearBoard.setConnectionStateHandler(new MetaWearBoard.ConnectionStateHandler() {
 
                 @Override
                 public void connected() {
                     ArrayList<String> kopieDerMacAdresse = macAdressen;
-                    Log.i(LOG, kopieDerMacAdresse.get(zahl) + " Connected");
+                    Log.i(LOG, kopieDerMacAdresse.get(numberOfConnectedDevices) + " Connected");
 
                     metaWearBoards.add(metaWearBoard);
 
@@ -121,14 +131,14 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                     initializeAccExtern(metaWearBoard);
                     initializeGyroExtern(metaWearBoard);
 
-                    isSensorConnected[zahl] = true;
+                    isSensorConnected[numberOfConnectedDevices] = true;
 
                 }
 
                 @Override
                 public void disconnected() {
                     Log.i(LOG, "Connected Lost");
-                    isSensorConnected[zahl] = false;
+                    isSensorConnected[numberOfConnectedDevices] = false;
                 }
 
                 @Override
@@ -139,6 +149,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             });
 
             metaWearBoard.connect();
+
 
 
         }
@@ -154,10 +165,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     private void initializeAccExtern(MetaWearBoard metaWearBoard){
 
-        for (int i = 0; i < anzahl_der_externen_sensoren; i++) {
+
             try {
 
-                Bmi160Accelerometer  accelerometer = metaWearBoard.getModule(Bmi160Accelerometer.class);
+                Bmi160Accelerometer accelerometer = metaWearBoard.getModule(Bmi160Accelerometer.class);
 
                 // Set the sampling frequency to 50Hz, or closest valid ODR
                 accelerometer.configureAxisSampling()
@@ -180,7 +191,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             }
 
 
-        }
+
 
 
 
@@ -188,7 +199,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     private void initializeGyroExtern(MetaWearBoard metaWearBoard) {
         Log.i(LOG, "Starte ExterneGYRO Sensoren");
-        for (int i = 0; i < anzahl_der_externen_sensoren; i++) {
+
             try {
                 Bmi160Gyro bmi160Gyro = metaWearBoard.getModule(Bmi160Gyro.class);
 
@@ -206,91 +217,117 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             catch (UnsupportedModuleException e) {
                 e.printStackTrace();
             }
-        }
+
 
 
     }
 
 
     public void getAccDataFromExtern(){
-        final String acc1 = "acc_stream_key";
-        final String acc2 = "acc_stream_key2";
-
-
-                accelerometerArrayList.get(0).routeData().fromAxes().stream(acc1).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
-                    @Override
-                    public void success(RouteManager result) {
-                        result.subscribe(acc1, new RouteManager.MessageHandler() {
-                            @Override
-                            public void process(Message message) {
-                                CartesianFloat axes = message.getData(CartesianFloat.class);
-                             //   Log.i(acc1, message.getData(CartesianFloat.class).toString());
-                                extAccX = axes.x();
-                                extAccY = axes.y();
-                                extAccZ = axes.z();
+//        final String acc1 = "acc_stream_key";
+//        final String acc2 = "acc_stream_key2";
+//
+//
+//                accelerometerArrayList.get(0).routeData().fromAxes().stream(acc1).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+//                    @Override
+//                    public void success(RouteManager result) {
+//                        result.subscribe(acc1, new RouteManager.MessageHandler() {
+//                            @Override
+//                            public void process(Message message) {
+//                                CartesianFloat axes = message.getData(CartesianFloat.class);
+//                             //   Log.i(acc1, message.getData(CartesianFloat.class).toString());
+//                                extAccX = axes.x();
+//                                extAccY = axes.y();
+//                                extAccZ = axes.z();
+//                            }
+//                        });
+//
+//                    }
+//                });
+    //    Log.i(LOG, "AccelerometerListe: " + accelerometerArrayList.size());
+        for (int i = 0; i < accelerometerArrayList.size(); i++) {
+            final int arrayListSize = i;
+    //        Log.i(LOG, "Durchlauf: " + arrayListSize);
+            accelerometerArrayList.get(i).routeData().fromAxes().stream(accDataTransferString[i]).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+                @Override
+                public void success(RouteManager result) {
+                    result.subscribe(accDataTransferString[arrayListSize], new RouteManager.MessageHandler() {
+                        @Override
+                        public void process(Message message) {
+                            CartesianFloat axes = message.getData(CartesianFloat.class);
+                            //  Log.i(acc2, message.getData(CartesianFloat.class).toString());
+                            switch (arrayListSize) {
+                                case 0:
+                                    extAccX = axes.x();
+                                    extAccY = axes.y();
+                                    extAccZ = axes.z();
+                                    break;
+                                case 1:
+                                    extAccX2 = axes.x();
+                                    extAccY2 = axes.y();
+                                    extAccZ2 = axes.z();
+                                    break;
+                                case 2:
+                                    extAccX3 = axes.x();
+                                    extAccY3 = axes.y();
+                                    extAccZ3 = axes.z();
+                                    break;
+                                case 3:
+                                    extAccX4 = axes.x();
+                                    extAccY4 = axes.y();
+                                    extAccZ4 = axes.z();
+                                    break;
                             }
-                        });
+                        }
+                    });
 
-                    }
-                });
-
-        accelerometerArrayList.get(1).routeData().fromAxes().stream(acc2).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
-                    @Override
-                    public void success(RouteManager result) {
-                        result.subscribe(acc2, new RouteManager.MessageHandler() {
-                            @Override
-                            public void process(Message message) {
-                                CartesianFloat axes = message.getData(CartesianFloat.class);
-                              //  Log.i(acc2, message.getData(CartesianFloat.class).toString());
-                                extAccX2 = axes.x();
-                                extAccY2 = axes.y();
-                                extAccZ2 = axes.z();
-                            }
-                        });
-
-                    }
-                });
-
+                }
+            });
+        }
     }
 
     public void getGyroDataFromExtern(){
-        final String gyro_stream_key1 = "gyro_stream_key1";
-        final String gyro_stream_key2 = "gyro_stream_key2";
 
+        for (int i = 0; i < gyroArrayList.size(); i++) {
+            final int arrayListSize = i;
+            gyroArrayList.get(i).routeData().fromAxes().stream(gyroDataTransferString[i]).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+                @Override
+                public void success(RouteManager result) {
+                    result.subscribe(gyroDataTransferString[arrayListSize], new RouteManager.MessageHandler() {
+                        @Override
+                        public void process(Message message) {
+                            CartesianFloat axes = message.getData(CartesianFloat.class);
+                            Log.i(gyroDataTransferString[arrayListSize], message.getData(CartesianFloat.class).toString());
 
-        gyroArrayList.get(0).routeData().fromAxes().stream(gyro_stream_key1).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
-            @Override
-            public void success(RouteManager result) {
-                result.subscribe(gyro_stream_key1, new RouteManager.MessageHandler() {
-                    @Override
-                    public void process(Message message) {
-                        CartesianFloat axes = message.getData(CartesianFloat.class);
-                        Log.i(gyro_stream_key1, message.getData(CartesianFloat.class).toString());
-                        extGyroX = axes.x();
-                        extGyroY = axes.y();
-                        extGyroZ = axes.z();
-                    }
-                });
+                            switch (arrayListSize){
+                                case 0:
+                                    extGyroX = axes.x();
+                                    extGyroY = axes.y();
+                                    extGyroZ = axes.z();
+                                    break;
+                                case 1:
+                                    extGyroX2 = axes.x();
+                                    extGyroY2 = axes.y();
+                                    extGyroX2 = axes.z();
+                                    break;
+                                case 2:
+                                    extGyroX3 = axes.x();
+                                    extGyroY3 = axes.y();
+                                    extGyroX3 = axes.z();
+                                    break;
+                                case 3:
+                                    extGyroX4 = axes.x();
+                                    extGyroY4 = axes.y();
+                                    extGyroX4 = axes.z();
+                                    break;
+                            }
 
-            }
-        });
+                        }
+                    });
 
-        gyroArrayList.get(1).routeData().fromAxes().stream(gyro_stream_key2).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
-            @Override
-            public void success(RouteManager result) {
-                result.subscribe(gyro_stream_key2, new RouteManager.MessageHandler() {
-                    @Override
-                    public void process(Message message) {
-                        CartesianFloat axes = message.getData(CartesianFloat.class);
-                        Log.i(gyro_stream_key2, message.getData(CartesianFloat.class).toString());
-                        extGyroX2 = axes.x();
-                        extGyroY2 = axes.y();
-                        extGyroX2 = axes.z();
-                    }
-                });
-
-            }
-        });
+                }
+            });
+        }
 
     }
 
@@ -338,11 +375,55 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     }
 
 
+    public void changeLEDColorToStateRUNNING(){
+        for (int i = 0; i < metaWearBoards.size(); i++) {
+            try {
+                Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
+                Led ledModule = metaWearBoards.get(i).getModule(Led.class);
+                ledModule.configureColorChannel(Led.ColorChannel.BLUE)
+                        .setRiseTime((short) 0).setPulseDuration((short) 1000)
+                        .setRepeatCount((byte) -1).setHighTime((short) 500)
+                        .setHighIntensity((byte) 16).setLowIntensity((byte) 16)
+                        .commit();
+                ledModule.play(true);
+            } catch (UnsupportedModuleException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public void changeLEDColorToStatePAUSE(){
+        for (int i = 0; i < metaWearBoards.size(); i++) {
+            try {
+                Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
+                Led ledModule = metaWearBoards.get(i).getModule(Led.class);
+                ledModule.configureColorChannel(Led.ColorChannel.RED)
+                        .setRiseTime((short) 0).setPulseDuration((short) 1000)
+                        .setRepeatCount((byte) -1).setHighTime((short) 500)
+                        .setHighIntensity((byte) 16).setLowIntensity((byte) 16)
+                        .commit();
+                ledModule.play(true);
+            } catch (UnsupportedModuleException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     public void closeExternalSensors(){
         Log.i(LOG, "Externe Sensoren werden deaktiviert!");
         for (int i = 0; i < metaWearBoards.size(); i++) {
             Log.i(LOG, "1.Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
             try {
+
+                // Stoppe Accelerometer
+                accelerometerArrayList.get(i).stop();
+                accelerometerArrayList.get(i).disableAxisSampling();
+
+                // Stoppe Gyroscop
+                gyroArrayList.get(i).stop();
+
                 Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
                 ledModule.play(false);
@@ -350,11 +431,13 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             } catch (UnsupportedModuleException e) {
                 e.printStackTrace();
             }
-
-
         }
-    }
+        gyroArrayList = new ArrayList<>();
+        accelerometerArrayList = new ArrayList<>();
+        metaWearBoards = new ArrayList<>();
 
+
+    }
 
 
 
