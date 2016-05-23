@@ -47,6 +47,12 @@ import java.util.Date;
 public class AndroidSensorsActivity extends ExternalSensorsActivity implements SensorEventListener {
 
 
+    // Variablen für AudioPlayer und Label
+    private int choosenExercise = 0;
+    public static String label;
+    private int nextExerciseAudio;
+    private MediaPlayer mp;
+
 
     public SensorManager sensorManager;
     public Sensor accelerometer, gyroscop, näherungssensor, linearAcc, magnetometer, rotationVector;
@@ -334,8 +340,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         Long tsLong = System.currentTimeMillis();
         String timestamp = tsLong.toString();
 
-        Log.i( LOG + " DATEN", timestamp + ": " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
-                + "," + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
+        Log.i( LOG + " DATEN", timestamp + ": ACC1: " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
+                + ",  ACC2: " + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
                 + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
                 + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2));
 
@@ -532,6 +538,79 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
 
         }
+    }
+
+    public void setExerciseLabelAndPlaySoundNextExercise(){
+        switch (choosenExercise){
+            case 0:
+                choosenExercise = 1;
+                label = "Crunch";
+                nextExerciseAudio = R.raw.uebung_crunch;
+                break;
+            case 1:
+                choosenExercise = 2;
+                label = "Lunge";
+                nextExerciseAudio = R.raw.uebung_ausfall;
+                break;
+            case 2:
+                choosenExercise = 3;
+                label = "Jumping Jack";
+                nextExerciseAudio = R.raw.uebung_jumpingjack;
+                break;
+            case 3:
+                choosenExercise = 4;
+                label = "Bicycle Crunch";
+                nextExerciseAudio = R.raw.uebung_bicycle;
+                break;
+            case 4:
+                choosenExercise = 5;
+                label = "Squat";
+                nextExerciseAudio = R.raw.uebung_kniebeugen;
+                break;
+            case 5:
+                choosenExercise = 6;
+                label = "Mountain Climber";
+                nextExerciseAudio = R.raw.uebung_bergsteiger;
+                break;
+            case 6:
+                choosenExercise = 7;
+                label = "Russian Twist";
+                nextExerciseAudio = R.raw.uebung_russiantwist;
+                break;
+            case 7:
+                choosenExercise = 8;
+                label = "Push Up";
+                nextExerciseAudio = R.raw.uebung_liegestuetzen;
+                break;
+        }
+        playNextExerciseSound();
+    }
+
+    private void playNextExerciseSound() {
+
+
+        mp = MediaPlayer.create(getBaseContext(), nextExerciseAudio);
+        mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+
+                mp.start();
+
+            }
+        });
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+
+                mp.reset();
+                mp.release();
+
+
+
+            }
+        });
+
+
     }
 
 

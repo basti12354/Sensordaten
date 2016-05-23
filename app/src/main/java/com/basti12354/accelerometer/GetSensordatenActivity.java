@@ -21,8 +21,10 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
     Button startBtn, stopBtn;
     TextView aktuellerSatz;
     Boolean isRunning = false;
+    Boolean paused = false;
 
-    long pauseDuration = 30000l;
+    // 30000 entspricht 30 Sekunden
+    long pauseDuration = 5000l;
     Timer pauseTimer = new ExampleTimer(1000l, pauseDuration);
     Thread t;
 
@@ -36,6 +38,8 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
         intitializeSmartphoneSensors();
 
+        // Wird beim ersten Start der Activity hier ausgeführt -> danach sobald der Pause Btn gedrückt wird
+        setExerciseLabelAndPlaySoundNextExercise();
 
         // Keep Screen ON
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -74,19 +78,25 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
                 // Sensoren laufen gerade und werden nun pausiert!
                 else {
-                    startBtn.setText("Start");
+                    if (paused == false) {
+                        startBtn.setText("Start");
 
-                    startPauseTimer();
+                        setExerciseLabelAndPlaySoundNextExercise();
 
-                    stopSensors();
+                        startPauseTimer();
 
-                    changeLEDColorToStatePAUSE();
-                    // Erhöhe den Zähler um eins!
-                    AndroidSensorsActivity.aktuellerSatz = AndroidSensorsActivity.aktuellerSatz + 1;
-                    setTextViewAktuellerSatz();
+                        // Speichert die Arrayliste mit Daten ab.
+                        stopSensors();
 
-                    isRunning = false;
-                    //printArrayList();
+                        changeLEDColorToStatePAUSE();
+                        // Erhöhe den Zähler um eins!
+                        AndroidSensorsActivity.aktuellerSatz = AndroidSensorsActivity.aktuellerSatz + 1;
+                        setTextViewAktuellerSatz();
+
+                        isRunning = false;
+                        //printArrayList();
+                    }
+
 
 
                 }
@@ -103,6 +113,9 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
     // Starte den PauseTimer -> jede Pause gleich lange Zeit
     private void startPauseTimer(){
+        // Setze Boolean um ein Klicken auf den PAUSE BTN zu verhindern
+        paused = true;
+
         //Start the timer.
         pauseTimer.start();
         if (pauseTimer.isRunning()) {
@@ -126,6 +139,8 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
                                         // WENN VERBLEIBENDE ZEIT UNTER 0 ist!!!!
                                         if (remainingTime <= 0) {
+                                            // Pause ist nun vorbei setze boolean wieder in alten Zustand, damit der Btn wieder gedrückt werden kann
+                                            paused = false;
                                            stopPauseTimer();
                                             t.interrupt();
                                         }
@@ -149,7 +164,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
         changeLEDColorToStateRUNNING();
 
-                    pauseTimer.cancel();
+         pauseTimer.cancel();
 
 
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -189,7 +204,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         return true;
     }
 
-    // TODO: Externe Sensoren leuchten weiter, wenn einmal der StartButton geklickt wurde -> Ursache unbekannt!
+
     // Stoppt Sensoren
     private void backToMainActivity(){
         closeExternalSensors();

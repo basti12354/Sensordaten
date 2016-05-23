@@ -179,10 +179,11 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 accelerometer.enableAxisSampling();
                 // Switch the accelerometer to active mode
                 accelerometer.start();
-                Log.i(LOG, "Externe-ACC Sensoren GESTARTET");
+
 
 
                 accelerometerArrayList.add(accelerometer);
+                Log.i(LOG, "Externe-ACC Sensoren GESTARTET " + "Size: " + accelerometerArrayList.size());
             }
 
 
@@ -247,7 +248,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     //    Log.i(LOG, "AccelerometerListe: " + accelerometerArrayList.size());
         for (int i = 0; i < accelerometerArrayList.size(); i++) {
             final int arrayListSize = i;
-    //        Log.i(LOG, "Durchlauf: " + arrayListSize);
+            Log.i(LOG, "Durchlauf: " + arrayListSize);
             accelerometerArrayList.get(i).routeData().fromAxes().stream(accDataTransferString[i]).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
                 @Override
                 public void success(RouteManager result) {
@@ -258,11 +259,13 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                             //  Log.i(acc2, message.getData(CartesianFloat.class).toString());
                             switch (arrayListSize) {
                                 case 0:
+                                    Log.i(LOG, "1. ACC");
                                     extAccX = axes.x();
                                     extAccY = axes.y();
                                     extAccZ = axes.z();
                                     break;
                                 case 1:
+                                    Log.i(LOG, "2. ACC");
                                     extAccX2 = axes.x();
                                     extAccY2 = axes.y();
                                     extAccZ2 = axes.z();
@@ -380,6 +383,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             try {
                 Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
+
+                // Stop playing patterns and clear all programmed patterns
+                ledModule.stop(true);
+
                 ledModule.configureColorChannel(Led.ColorChannel.BLUE)
                         .setRiseTime((short) 0).setPulseDuration((short) 1000)
                         .setRepeatCount((byte) -1).setHighTime((short) 500)
@@ -398,6 +405,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             try {
                 Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
+
+                // Stop playing patterns and clear all programmed patterns
+                ledModule.stop(true);
+
                 ledModule.configureColorChannel(Led.ColorChannel.RED)
                         .setRiseTime((short) 0).setPulseDuration((short) 1000)
                         .setRepeatCount((byte) -1).setHighTime((short) 500)

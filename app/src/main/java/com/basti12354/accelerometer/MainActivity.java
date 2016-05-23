@@ -64,41 +64,41 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             }
 
 
-            switch (position){
-                case 0:
-                    label = "Push Up";
-                    break;
-                case 1:
-                    label = "Lunge";
-                    break;
-                case 2:
-                    label = "Crunch";
-                    break;
-                case 3:
-                    label = "Jumping Jack";
-                    break;
-                case 4:
-                    label = "Donkey Kick";
-                    break;
-                case 5:
-                    label = "Squat";
-                    break;
-                case 6:
-                    label = "Mountain Climber";
-                    break;
-                case 7:
-                    label = "Bicycle Crunch";
-                    break;
-                case 8:
-                    label = "Burpees";
-                    break;
-                case 9:
-                    label = "Russian Twist";
-                    break;
-
-
-            }
-            Log.i("Label: ", label);
+//            switch (position){
+//                case 0:
+//                    label = "Push Up";
+//                    break;
+//                case 1:
+//                    label = "Lunge";
+//                    break;
+//                case 2:
+//                    label = "Crunch";
+//                    break;
+//                case 3:
+//                    label = "Jumping Jack";
+//                    break;
+//                case 4:
+//                    label = "Donkey Kick";
+//                    break;
+//                case 5:
+//                    label = "Squat";
+//                    break;
+//                case 6:
+//                    label = "Mountain Climber";
+//                    break;
+//                case 7:
+//                    label = "Bicycle Crunch";
+//                    break;
+//                case 8:
+//                    label = "Burpees";
+//                    break;
+//                case 9:
+//                    label = "Russian Twist";
+//                    break;
+//
+//
+//            }
+//            Log.i("Label: ", label);
         }
         else {
             Toast.makeText(MainActivity.this, "Bitte Namen eingeben!", Toast.LENGTH_SHORT).show();
