@@ -20,12 +20,14 @@ import com.basti12354.accelerometer.timer.Timer;
 public class GetSensordatenActivity extends AndroidSensorsActivity implements View.OnClickListener {
     Button startBtn, stopBtn;
     TextView aktuellerSatz;
-    Boolean isRunning = false;
+
     Boolean paused = false;
+    Boolean firstStart = true;
 
     // 30000 entspricht 30 Sekunden
-    long pauseDuration = 5000l;
-    Timer pauseTimer = new ExampleTimer(1000l, pauseDuration);
+    long pauseDuration = 30000l;
+    long pauseBetweenDifferentExercises = 60000l;
+    Timer pauseTimer;
     Thread t;
 
 
@@ -52,8 +54,6 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         startBtn.setOnClickListener(this);
   //      stopBtn.setOnClickListener(this);
 
-        TextView uebung = (TextView) findViewById(R.id.exerciseName);
-        uebung.setText(MainActivity.label);
 
         setTextViewAktuellerSatz();
 
@@ -67,35 +67,62 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         switch (v.getId()){
             case R.id.startBtn:
 
-                // Fall: Sensoren laufen gerade NICHT!
-                if (isRunning == false) {
+                // Erster Start -> bei Klick wird die Datenerhebung gestartet!
+                if ( firstStart) {
                     startBtn.setText("Stop");
                     startSensors();
                     // Ändere die LEDs der verbundenen Sensoren -> damit Verbindungsfehler gezeigt werden können!
+                    changeLEDColorToStateRUNNING();
 
-                    isRunning = true;
+                    firstStart = false;
                 }
 
                 // Sensoren laufen gerade und werden nun pausiert!
                 else {
-                    if (paused == false) {
-                        startBtn.setText("Start");
+                    if (paused == false && choosenExercise != 8) {
+                        startBtn.setText("PAUSE...");
 
-                        setExerciseLabelAndPlaySoundNextExercise();
-
-                        startPauseTimer();
-
-                        // Speichert die Arrayliste mit Daten ab.
+                        // Speichert die Arrayliste mit Daten ab. Muss vor der Erhöhung des Zählers geschehen!
                         stopSensors();
 
+                        // Ändert das Label für die nächste Übung
+                        setExerciseLabelAndPlaySoundNextExercise();
+
+
+
                         changeLEDColorToStatePAUSE();
-                        // Erhöhe den Zähler um eins!
-                        AndroidSensorsActivity.aktuellerSatz = AndroidSensorsActivity.aktuellerSatz + 1;
+
+                        if (AndroidSensorsActivity.aktuellerSatz == 3) {
+                            AndroidSensorsActivity.aktuellerSatz = 1;
+                            // Pause zwischen verschiedenen Übungen dauert länger
+                           // pauseTimer = new ExampleTimer(1000l, pauseBetweenDifferentExercises);
+
+                            // Zurück zur MAIN-Activity wenn Übung 3 Mal gemacht wurde!
+                            backToMainActivity();
+
+                        }
+                        else {
+                            // Erhöhe den Zähler um eins!
+                            AndroidSensorsActivity.aktuellerSatz = AndroidSensorsActivity.aktuellerSatz + 1;
+
+                            // Pause zwischen Sätzen EINER Übung!
+                            pauseTimer = new ExampleTimer(1000l, pauseDuration);
+                            startPauseTimer();
+                        }
+
                         setTextViewAktuellerSatz();
 
-                        isRunning = false;
+
                         //printArrayList();
                     }
+                    else if (choosenExercise == 8){
+
+                            startBtn.setText("AUFNAHME BEENDET!");
+                            // Speichert die Arrayliste mit Daten ab. Muss vor der Erhöhung des Zählers geschehen!
+                            stopSensors();
+                            closeExternalSensors();
+                        }
+
 
 
 
@@ -171,9 +198,14 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         // Vibrate for 1000 milliseconds
         v.vibrate(1000);
 
-        // Nach VIBRATION werden die Sensoren wieder gestartet!
-        startSensors();
-        isRunning = true;
+
+        // es müssen noch weitere Übungen aufgenommen werden!
+
+            // Nach VIBRATION werden die Sensoren wieder gestartet!
+            startSensors();
+
+            startBtn.setText("STOP!");
+
     }
 
 
@@ -197,9 +229,6 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
                 break;
 
-
-
-
         }
         return true;
     }
@@ -208,11 +237,11 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
     // Stoppt Sensoren
     private void backToMainActivity(){
         closeExternalSensors();
-        if (pauseTimer.isRunning()) {
+        if ((pauseTimer != null) &&  pauseTimer.isRunning()) {
             pauseTimer.cancel();
         }
         stopSensors();
-        isRunning = false;
+
 
         finish();
         Intent intent  = new Intent(this, MainActivity.class);

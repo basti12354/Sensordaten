@@ -2,16 +2,19 @@
     <string name="app_name">Accelerometer</string>
 
     <string-array name="uebungen">
-        <item>Push Up</item>
-        <item>Lunge</item>
         <item>Crunch</item>
-        <item>Jumping Jack</item>
-        <item>Donkey Kick</item>
-
-        <item>Squat</item>
-        <item>Mountain Climber</item>
+        <item>Ausfallschritt</item>
+        <item>Hampelmann</item>
         <item>Bicycle Crunch</item>
+        <item>Kniebeugen</item>
+        <item>Bergsteiger</item>
         <item>Russian Twist</item>
-        <item>Burpees</item>
+        <item>Liegestützen</item>
+
+
+
+
+
+
     </string-array>
 </resources>

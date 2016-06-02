@@ -7,7 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Exercise: "
+        android:text="Crunch"
         android:id="@+id/exerciseName"
         android:layout_gravity="center_horizontal"
         android:layout_alignParentTop="true"

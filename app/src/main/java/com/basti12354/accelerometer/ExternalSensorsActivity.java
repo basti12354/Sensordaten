@@ -29,34 +29,37 @@ import com.mbientlab.metawear.module.Accelerometer;
 import java.util.ArrayList;
 
 /**
- * Created by Basti on 06.05.2016.
+ * ############Klasse für die Verbindung/Messungen der Externen SENSOREN#####################
  */
 public class ExternalSensorsActivity extends AppCompatActivity implements ServiceConnection {
 
+    // Variablen um externen Daten zu speichern, sobald sie gestreamt wurden
     public static float extAccX = 0, extAccY = 0, extAccZ = 0, extAccX2 = 0, extAccY2 = 0, extAccZ2 = 0,
             extAccX3 = 0, extAccY3 = 0, extAccZ3 = 0, extAccX4 = 0, extAccY4 = 0, extAccZ4 = 0;
+    public static float extGyroX = 0, extGyroY = 0, extGyroZ = 0, extGyroX2 = 0, extGyroY2 = 0, extGyroZ2 = 0,
+            extGyroX3 = 0, extGyroY3 = 0, extGyroZ3 = 0, extGyroX4 = 0, extGyroY4 = 0, extGyroZ4 = 0;
 
+
+    // String Arrays werden für die StreamingVerbindung zum Smartphone gebraucht
     private String[] accDataTransferString = {"acc_stream_key1", "acc_stream_key2", "acc_stream_key3","acc_stream_key4"};
     private String[] gyroDataTransferString = {"gyro_stream_key1", "gyro_stream_key2", "gyro_stream_key3","gyro_stream_key4"};
 
-    public static float extGyroX = 0, extGyroY = 0, extGyroZ = 0, extGyroX2 = 0, extGyroY2 = 0, extGyroZ2 = 0,
-            extGyroX3 = 0, extGyroY3 = 0, extGyroZ3 = 0, extGyroX4 = 0, extGyroY4 = 0, extGyroZ4 = 0;
 
     // Externe Sensoren!
     private MetaWearBleService.LocalBinder serviceBinder;
 
+    // Farben dieser TextViews sollen Zustand/Verbindung zu den externen Sensoren zeigen
     TextView textViewSensor1, textViewSensor2, textViewSensor3, textViewSensor4;
-
     private boolean[] isSensorConnected = {false, false, false, false};
 
+    // Arraylisten in denen je nach Anzahl der verbundenen Sensoren, die Adapter der Sensoren gespeichert werden
     private ArrayList<MetaWearBoard> metaWearBoards = new ArrayList<MetaWearBoard>();
     private ArrayList<Bmi160Accelerometer> accelerometerArrayList = new ArrayList<Bmi160Accelerometer>();
     private ArrayList<Bmi160Gyro> gyroArrayList = new ArrayList<Bmi160Gyro>();
 
     public final String LOG = "Externe Sensoren";
 
-    private boolean sensor1, sensor2, sensor3, sensor4;
-
+    // Variable muss je nach ANZAHL der Sensoren geändert werden; 2 enstpricht hierbei 2 Sensoren, 4 -> 4...
     private int anzahl_der_externen_sensoren = 2;
 
     @Override
@@ -83,7 +86,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     }
 
-    // Externe Sensoren
+    // Externe Sensoren werden verbunden
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         // Typecast the binder to the service's LocalBinder class
@@ -94,7 +97,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
          Log.i(LOG, "Service Bind2" );
 
-        // Replace with boards MAC Adress
+        // MAC Adressen der externen Sensoren
         final String mwMacAddress = "D1:C4:AA:BF:0B:22";
         final String mwMacAddress2 = "C6:9E:B6:91:A5:F7";
 
@@ -109,12 +112,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
             final int numberOfConnectedDevices = i;
 
-
-
+            // Verbindet das Board mit den verschiedenen MAC-Adressen von oben
             BluetoothDevice btDevice = btManager.getAdapter().getRemoteDevice(macAdressen.get(numberOfConnectedDevices));
             final MetaWearBoard metaWearBoard = serviceBinder.getMetaWearBoard(btDevice);
-
-
 
 
             metaWearBoard.setConnectionStateHandler(new MetaWearBoard.ConnectionStateHandler() {
@@ -144,12 +144,18 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 @Override
                 public void failure(int status, Throwable error) {
                     Log.e(LOG, "Error connecting", error);
-                    Toast.makeText(getBaseContext(), "EXTERNE Sensoren NICHT richtig verbunden!", Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(getBaseContext(), "EXTERNE Sensoren NICHT richtig verbunden!", Toast.LENGTH_SHORT).show();
+//                    metaWearBoards.remove(numberOfConnectedDevices);
+//
+//                    accelerometerArrayList.remove(numberOfConnectedDevices);
+//                    gyroArrayList.remove(numberOfConnectedDevices);
+//                    isSensorConnected[numberOfConnectedDevices] = false;
+
+                 //   metaWearBoard.connect();
                 }
             });
 
             metaWearBoard.connect();
-
 
 
         }
@@ -162,9 +168,8 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     @Override
     public void onServiceDisconnected(ComponentName componentName) { }
 
-
+    // Konfiguriert den ACC Adapter -> Board muss übergeben werden, da diese für jedes Board einzeln erstellt und konfig. werden müssen!
     private void initializeAccExtern(MetaWearBoard metaWearBoard){
-
 
             try {
 
@@ -173,7 +178,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 // Set the sampling frequency to 50Hz, or closest valid ODR
                 accelerometer.configureAxisSampling()
                         .setFullScaleRange(Bmi160Accelerometer.AccRange.AR_4G)
-                        .setOutputDataRate(Bmi160Accelerometer.OutputDataRate.ODR_200_HZ)
+                        .setOutputDataRate(Bmi160Accelerometer.OutputDataRate.ODR_50_HZ)
                         .commit();
                 // enable axis sampling
                 accelerometer.enableAxisSampling();
@@ -191,13 +196,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 e.printStackTrace();
             }
 
-
-
-
-
-
     }
 
+    // Konfiguriert den GYRO Adapter -> Board muss übergeben werden, da diese für jedes Board einzeln erstellt und konfig. werden müssen!
     private void initializeGyroExtern(MetaWearBoard metaWearBoard) {
         Log.i(LOG, "Starte ExterneGYRO Sensoren");
 
@@ -207,7 +208,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
                 bmi160Gyro.configure()
                         .setFullScaleRange(Bmi160Gyro.FullScaleRange.FSR_2000)
-                        .setOutputDataRate(Bmi160Gyro.OutputDataRate.ODR_200_HZ)
+                        .setOutputDataRate(Bmi160Gyro.OutputDataRate.ODR_50_HZ)
                         .commit();
                 bmi160Gyro.start();
 
@@ -223,8 +224,15 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     }
 
+    // Methode updatet die Variablen, indem der STREAM aller Sensoren gestartet wird
+    // CAVE: Muss nur einmal aufgerufen werden, das Streaming wird dann je nach obiger Konfiguration in diesen Abständen durchgeführt.
+    public void getAllDataFromExternalSensors(){
+        getAccDataFromExtern();
+        getGyroDataFromExtern();
+    }
 
-    public void getAccDataFromExtern(){
+    // Streamt die Daten aller verbundenen Accelerometer
+    private void getAccDataFromExtern(){
 //        final String acc1 = "acc_stream_key";
 //        final String acc2 = "acc_stream_key2";
 //
@@ -248,7 +256,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     //    Log.i(LOG, "AccelerometerListe: " + accelerometerArrayList.size());
         for (int i = 0; i < accelerometerArrayList.size(); i++) {
             final int arrayListSize = i;
-            Log.i(LOG, "Durchlauf: " + arrayListSize);
+       //     Log.i("STREAM", "Durchlauf: " + arrayListSize);
             accelerometerArrayList.get(i).routeData().fromAxes().stream(accDataTransferString[i]).commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
                 @Override
                 public void success(RouteManager result) {
@@ -256,16 +264,17 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                         @Override
                         public void process(Message message) {
                             CartesianFloat axes = message.getData(CartesianFloat.class);
-                            //  Log.i(acc2, message.getData(CartesianFloat.class).toString());
+                           //   Log.i("STREAM", message.getData(CartesianFloat.class).toString());
                             switch (arrayListSize) {
                                 case 0:
-                                    Log.i(LOG, "1. ACC");
+                                 //   Log.i(LOG, "1. ACC");
                                     extAccX = axes.x();
                                     extAccY = axes.y();
                                     extAccZ = axes.z();
+                               //     Log.i("STREAM ", "X-WERT ACC: " + extAccX);
                                     break;
                                 case 1:
-                                    Log.i(LOG, "2. ACC");
+                                  //  Log.i(LOG, "2. ACC");
                                     extAccX2 = axes.x();
                                     extAccY2 = axes.y();
                                     extAccZ2 = axes.z();
@@ -288,8 +297,8 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             });
         }
     }
-
-    public void getGyroDataFromExtern(){
+    // Streamt die Daten aller verbundenen Gyros
+    private void getGyroDataFromExtern(){
 
         for (int i = 0; i < gyroArrayList.size(); i++) {
             final int arrayListSize = i;
@@ -300,13 +309,14 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                         @Override
                         public void process(Message message) {
                             CartesianFloat axes = message.getData(CartesianFloat.class);
-                            Log.i(gyroDataTransferString[arrayListSize], message.getData(CartesianFloat.class).toString());
+                         //   Log.i("STREAM " + gyroDataTransferString[arrayListSize], message.getData(CartesianFloat.class).toString());
 
                             switch (arrayListSize){
                                 case 0:
                                     extGyroX = axes.x();
                                     extGyroY = axes.y();
                                     extGyroZ = axes.z();
+                              //      Log.i("STREAM ", "X-WERT GYRO: " + extGyroX);
                                     break;
                                 case 1:
                                     extGyroX2 = axes.x();
@@ -334,14 +344,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     }
 
-//    public boolean checkIfSensorsAreReady(){
-//        if (sensor1 && sensor2) {
-//            changeColorOfTextViews();
-//            return true;
-//        }
-//        else return false;
-//    }
 
+    // Methode soll je nach positiver Verbindung die Farben der TextViews ändern
+    // Aktuell kann KEIN DISCONNECT eines Sensors dargestellt werden!
     public void changeColorOfTextViews(){
         textViewSensor1 = (TextView) findViewById(R.id.sensor1);
         textViewSensor2 = (TextView) findViewById(R.id.sensor2);
@@ -362,6 +367,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         }
     }
 
+    // Zeigt den Zustand: ERFOLGREICH VERBUNDEN = GRÜN
     private void connectedSensorLED(MetaWearBoard metaWearBoard){
 
         try {
@@ -377,14 +383,13 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         }
     }
 
-
+    // Zeigt den Zustand: DATENMESSUNG = BLAU
     public void changeLEDColorToStateRUNNING(){
         for (int i = 0; i < metaWearBoards.size(); i++) {
             try {
-                Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
+                Log.i(LOG, "Externe Sensoren LAUFEN!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
 
-                // Stop playing patterns and clear all programmed patterns
                 ledModule.stop(true);
 
                 ledModule.configureColorChannel(Led.ColorChannel.BLUE)
@@ -399,14 +404,13 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         }
     }
 
-
+    // Zeigt den Zustand: PAUSE = ROT
     public void changeLEDColorToStatePAUSE(){
         for (int i = 0; i < metaWearBoards.size(); i++) {
             try {
-                Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
+                Log.i(LOG, "Externe Sensoren werden PAUSIERT!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
 
-                // Stop playing patterns and clear all programmed patterns
                 ledModule.stop(true);
 
                 ledModule.configureColorChannel(Led.ColorChannel.RED)
@@ -422,6 +426,8 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     }
 
 
+    // Schließt die Verbindungen zu den externen Sensoren!
+    // Muss unbedingt aufgerufen werden, da sonst die Verbindung zu den Sensoren nur durch Reset (Batterie raus/rein)
     public void closeExternalSensors(){
         Log.i(LOG, "Externe Sensoren werden deaktiviert!");
         for (int i = 0; i < metaWearBoards.size(); i++) {
@@ -447,6 +453,53 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         accelerometerArrayList = new ArrayList<>();
         metaWearBoards = new ArrayList<>();
 
+
+    }
+
+    // Pausiert das Datenstreaming
+    public void pauseExternalSensors(){
+        for (int i = 0; i < metaWearBoards.size(); i++) {
+
+
+                // Stoppe Accelerometer
+                accelerometerArrayList.get(i).stop();
+                accelerometerArrayList.get(i).disableAxisSampling();
+
+                // Stoppe Gyroscop
+                gyroArrayList.get(i).stop();
+
+              Log.i(LOG + "PAUSE", "Externe Sensoren PAUSIERT");
+
+        }
+    }
+
+    // Startet das Streaming nach der Pause wieder
+    public void startExternalSensorsAfterPause() {
+        for (int i = 0; i < metaWearBoards.size(); i++) {
+
+            Bmi160Gyro bmi160Gyro = gyroArrayList.get(i);;
+
+
+            bmi160Gyro.configure()
+                    .setFullScaleRange(Bmi160Gyro.FullScaleRange.FSR_2000)
+                    .setOutputDataRate(Bmi160Gyro.OutputDataRate.ODR_50_HZ)
+                    .commit();
+            bmi160Gyro.start();
+
+            Bmi160Accelerometer accelerometer = accelerometerArrayList.get(i);
+
+            // Set the sampling frequency to 50Hz, or closest valid ODR
+            accelerometer.configureAxisSampling()
+                    .setFullScaleRange(Bmi160Accelerometer.AccRange.AR_4G)
+                    .setOutputDataRate(Bmi160Accelerometer.OutputDataRate.ODR_50_HZ)
+                    .commit();
+            // enable axis sampling
+            accelerometer.enableAxisSampling();
+            // Switch the accelerometer to active mode
+            accelerometer.start();
+
+            Log.i(LOG+"RESTART", "Externe Sensoren RESTARTET");
+        }
 
     }
 

@@ -51,7 +51,14 @@
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden">
         </activity>
-        <service android:enabled="true" android:name="com.basti12354.accelerometer.MyService" />
+        <activity
+            android:name="com.basti12354.accelerometer.ChooseExerciseFromList"
+            android:parentActivityName="com.basti12354.accelerometer.MainActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
+
+
 
 
 </application>

@@ -1,36 +1,20 @@
 package com.basti12354.accelerometer;
 
 
-import android.app.ProgressDialog;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.IBinder;
 import android.os.Vibrator;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.MediaController;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.VideoView;
-
-
 
 import java.io.File;
 import java.io.FileWriter;
@@ -39,7 +23,6 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by Basti on 13.04.2016.
@@ -48,15 +31,14 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
 
     // Variablen für AudioPlayer und Label
-    private int choosenExercise = 0;
-    public static String label;
+    public static int choosenExercise = 0;
+    public static String label = "Crunch"; // Erste Übung Crunch -> für Benennung des Btn bereits hier instantiiert!
     private int nextExerciseAudio;
     private MediaPlayer mp;
 
 
     public SensorManager sensorManager;
     public Sensor accelerometer, gyroscop, näherungssensor, linearAcc, magnetometer, rotationVector;
-
 
 
     // ACC Variablen
@@ -107,14 +89,12 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     // Intervall in welcher Zeit xy aufgerufen wird.
     private int mInterval = 10; // jede 10 ms! = 100 Hz  -> 20 ms wären 50 Hz
 
-    private Date d;
-
-    // Video
-    public ProgressDialog pDialog;
-    public VideoView videoView;
 
     // TextView Satzzähler
     public static int aktuellerSatz = 1;
+
+    // Variablen zum Abspeichern der Daten für Machine Learning und Qualitätsmaß
+    private String data4MachineLearning = "", data4QualityMeasure = "";
 
 
     @Override
@@ -124,19 +104,13 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
     }
 
-//    public void initializeViews() {
-//        currentX = (TextView) findViewById(R.id.currentX);
-//        currentY = (TextView) findViewById(R.id.currentY);
-//        currentZ = (TextView) findViewById(R.id.currentZ);
-//
-//        currentGyroX = (TextView) findViewById(R.id.gyroX);
-//        currentGyroY = (TextView) findViewById(R.id.gyroY);
-//        currentGyroZ = (TextView) findViewById(R.id.gyroZ);
-//
-//    }
 
     public void intitializeSmartphoneSensors(){
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        // Fülle Arrayliste mit Sensordaten mit Attributen für das Machine Learning
+        // Dies ist nur beim ersten Start der Sensoren nötig, da alle weiteren Sensordaten hinzugefügt werden!
+      //  fillArraylistWithMachineLearningAttributes();
 
         initializiseAccelerometer();
 
@@ -154,7 +128,6 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         // ######## EXTERN ###########
         // Externe Sensoren
         initializiseExternSensors();
-
 
     }
 
@@ -334,7 +307,6 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
     private void saveSensorDataAndActualTimeToArray(){
 
-        String label = "Liegestützen";
 
         // Aktuellen Timestamp
         Long tsLong = System.currentTimeMillis();
@@ -345,12 +317,13 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
                 + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
                 + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2));
 
-        sensorData.add(label + "," + timestamp + "," + Float.toString(deltaX) + "," + Float.toString(deltaY) + "," + Float.toString(deltaZ)
+      //  Log.i( LOG + " Array:", label);
+                sensorData.add(label  + "," + aktuellerSatz + "," + timestamp + "," + Float.toString(deltaX) + "," + Float.toString(deltaY) + "," + Float.toString(deltaZ)
                 + "," + Float.toString(gyroX) + "," + Float.toString(gyroY) + "," + Float.toString(gyroZ)
                 + "," + Float.toString(linearAccX) + "," + Float.toString(linearAccY) + "," + Float.toString(linearAccZ)
                 + "," + Float.toString(mAzimuth)+ "," + Float.toString(mPitch)+ "," + Float.toString(mRoll)
                 + "," + Float.toString(rotationVectorX)+ "," + Float.toString(rotationVectorY)+ "," + Float.toString(rotationVectorZ)
-                + "," + Float.toString(distance) + "," + aktuellerSatz
+                + "," + Float.toString(distance)
 
                 // Externe AccSensoren
                 + "," + Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
@@ -391,14 +364,27 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
                 e.printStackTrace();
             }
         }
-//        else {
-//            System.out.println("Existiert bereits");
-//            File fileTTS = new File(path + "/" + fileName +".txt");
-//        }
+        File subFolder = new File(path + "/" + MainActivity.probandenName);
+        Log.d("Pfad", path);
+        if (!subFolder.exists()){
+            try{
+                if(subFolder.mkdir()) {
+                    Log.i(LOG,"subFolder created");
+
+                } else {
+                    Log.i(LOG,"subFolder is not created");
+
+
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
 
         PrintWriter out = null;
         try {
-            out = new PrintWriter(new FileWriter(path + "/" + fileName + ".txt"));
+            out = new PrintWriter(new FileWriter(path + "/" + MainActivity.probandenName + "/" + fileName + ".txt"));
             for (String text : sensorData) {
                 out.println(text);
             }
@@ -408,6 +394,9 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         } finally {
             if (out != null) {
                 out.close();
+
+                // Löscht die Arrayliste, damit die Daten nicht doppelt gespeichert werden
+                sensorData.clear();
             }
         }
 
@@ -422,10 +411,14 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     // ######### Starte die Sensoren und speichere Werte alle ... ms in Arraylist!
     public void startSensors(){
 
-        mHandler = new android.os.Handler();
+        getAllDataFromExternalSensors();
 
-        startRepeatingTask();
-        timerIsRunning = true;
+//        mHandler = new android.os.Handler();
+//
+//        startRepeatingTask();
+//        timerIsRunning = true;
+
+
     }
 
     Runnable mStatusChecker = new Runnable() {
@@ -434,12 +427,10 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
             try {
                 changeColorOfTextViews();
 
-                // Hole mir alle Daten der Externen -> falls diese nicht bereit sind => 0 wird geliefert!
-                getAccDataFromExtern();
 
                 // Speichere die aktuellen Daten zur Arraylist
                 saveSensorDataAndActualTimeToArray();
-                //updateStatus(); //this function can change value of mInterval.
+
             } finally {
                 // 100% guarantee that this always happens, even if
                 // your update method throws an exception
@@ -458,65 +449,24 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
             mHandler.removeCallbacks(mStatusChecker);
             timerIsRunning = false;
 
-            SimpleDateFormat dfDate = new SimpleDateFormat("dd-MM-HH-mm-ss");
+
+            SimpleDateFormat dfDate = new SimpleDateFormat("dd-MM_HH-mm-ss");
             String data = "";
             Calendar c = Calendar.getInstance();
             data = dfDate.format(c.getTime());
             String datum = data.toString();
-            String speicherName = MainActivity.probandenName + "_" + MainActivity.label + "_" + aktuellerSatz + "_" + datum;
+            String speicherName = MainActivity.probandenName + "_" + label + "_" + aktuellerSatz + "_" + datum;
 
             save(speicherName);
         }
 
     }
-    private void playVideo(){
 
-        videoView = (VideoView) findViewById(R.id.videoView);
-        videoView.setVisibility(View.VISIBLE);
-
-
-        try {
-            MediaController mediaController = new MediaController(this);
-            mediaController.setAnchorView(videoView);
-
-            //  Uri vidUri = Uri.parse(vidAddress);
-            Uri vidUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.liege);
-            videoView.setMediaController(mediaController);
-            videoView.setVideoURI(vidUri);
-
-        }
-        catch (Exception e) {
-            Log.e("Error", e.getMessage());
-            e.printStackTrace();
-        }
-        videoView.requestFocus();
-        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                //pDialog.dismiss();
-                videoView.start();
-                //View view = findViewById(R.id.background);
-                //view.setBackgroundColor(0xff000000);
-
-                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mediaPlayer) {
-                        videoView.setVisibility(View.GONE);
-
-                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-                    }
-                });
-
-            }
-        });
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
-
 
 
         return super.onCreateOptionsMenu(menu);
@@ -526,64 +476,70 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
 
 
-
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // Checks the orientation of the screen
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            playVideo();
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
-
-        }
-    }
-
     public void setExerciseLabelAndPlaySoundNextExercise(){
         switch (choosenExercise){
             case 0:
-                choosenExercise = 1;
+                if (aktuellerSatz == 2){
+                    choosenExercise = 1;
+                }
+
                 label = "Crunch";
                 nextExerciseAudio = R.raw.uebung_crunch;
                 break;
             case 1:
+                if (aktuellerSatz == 2){
                 choosenExercise = 2;
-                label = "Lunge";
+                }
+                label = "Ausfallschritt";
                 nextExerciseAudio = R.raw.uebung_ausfall;
                 break;
             case 2:
+                if (aktuellerSatz == 2){
                 choosenExercise = 3;
-                label = "Jumping Jack";
+                }
+                label = "Hampelmann";
                 nextExerciseAudio = R.raw.uebung_jumpingjack;
                 break;
             case 3:
+                if (aktuellerSatz == 2){
                 choosenExercise = 4;
+                }
                 label = "Bicycle Crunch";
                 nextExerciseAudio = R.raw.uebung_bicycle;
                 break;
             case 4:
+                if (aktuellerSatz == 2){
                 choosenExercise = 5;
-                label = "Squat";
+                }
+                label = "Kniebeugen";
                 nextExerciseAudio = R.raw.uebung_kniebeugen;
                 break;
             case 5:
+                if (aktuellerSatz == 2){
                 choosenExercise = 6;
-                label = "Mountain Climber";
+                }
+                label = "Bergsteiger";
                 nextExerciseAudio = R.raw.uebung_bergsteiger;
                 break;
             case 6:
+                if (aktuellerSatz == 2){
                 choosenExercise = 7;
+                }
                 label = "Russian Twist";
                 nextExerciseAudio = R.raw.uebung_russiantwist;
                 break;
             case 7:
-                choosenExercise = 8;
-                label = "Push Up";
+                if (aktuellerSatz == 2) {
+                    choosenExercise = 8;
+                }
+                label = "Liegestuetz";
                 nextExerciseAudio = R.raw.uebung_liegestuetzen;
                 break;
         }
         playNextExerciseSound();
+        TextView uebung = (TextView) findViewById(R.id.exerciseName);
+        uebung.setText(label);
+
     }
 
     private void playNextExerciseSound() {
@@ -611,6 +567,22 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         });
 
 
+    }
+
+    private void fillArraylistWithMachineLearningAttributes(){
+        data4MachineLearning =  "@RELATION fitness              \n" +
+                "                                \n" +
+                "@ATTRIBUTE translate_xAxis REAL \n" +
+                "@ATTRIBUTE translate_yAxis REAL \n" +
+                "@ATTRIBUTE translate_zAxis REAL \n" +
+                "@ATTRIBUTE rotate_xAxis REAL    \n" +
+                "@ATTRIBUTE rotate_yAxis REAL    \n" +
+                "@ATTRIBUTE rotate_zAxis REAL    \n" +
+                "@ATTRIBUTE class {Crunch, Ausfallschritt, Hampelmann, Bicycle Crunch, Kniebeugen, Bergsteiger, Russian Twist, Liegestuetz} \n" +
+                "                                \n" +
+                "@data                           \n";
+
+        sensorData.add(data4MachineLearning);
     }
 
 

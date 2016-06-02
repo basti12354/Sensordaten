@@ -15,15 +15,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 
-public class MainActivity extends Activity implements AdapterView.OnItemClickListener{
+public class MainActivity extends Activity implements View.OnClickListener {
     private EditText editText;
     public static String probandenName;
-    public static String label;
+
+
 
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -35,76 +38,34 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         // Starte das Bluetooth automatisch!
         startBluetooth();
 
-        //ListView
-        String [] andereWorkouts = getResources().getStringArray(R.array.uebungen);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.list_center_item, andereWorkouts);
 
+        Button starteDatenerhebung = (Button) findViewById(R.id.starteDatenerhebung);
+        starteDatenerhebung.setText(GetSensordatenActivity.label);
+        starteDatenerhebung.setOnClickListener(this);
 
-        ListView listView = (ListView) findViewById(android.R.id.list);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(this);
+        Button chooseExerciseFromList = (Button) findViewById(R.id.listButton);
+        chooseExerciseFromList.setOnClickListener(this);
 
         editText = (EditText) findViewById(R.id.editText);
 
+        Switch aSwitch = (Switch) findViewById(R.id.switch1);
+
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                if(isChecked){
+                    startBluetooth();
+                }else{
+                    stopBluetooth();
+                }
+
+            }
+        });
+
     }
 
 
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        probandenName = editText.getText().toString();
-
-        if (probandenName.length() > 0){
-            if (mBluetoothAdapter.isEnabled()) {
-                Intent intent = new Intent(view.getContext(), GetSensordatenActivity.class);
-                startActivity(intent);
-            }
-            else {
-                Toast.makeText(MainActivity.this, "WARTE AUF BLUETOOTH! BITTE GLEICH NOCHMAL KLICKEN!", Toast.LENGTH_SHORT).show();
-            }
-
-
-//            switch (position){
-//                case 0:
-//                    label = "Push Up";
-//                    break;
-//                case 1:
-//                    label = "Lunge";
-//                    break;
-//                case 2:
-//                    label = "Crunch";
-//                    break;
-//                case 3:
-//                    label = "Jumping Jack";
-//                    break;
-//                case 4:
-//                    label = "Donkey Kick";
-//                    break;
-//                case 5:
-//                    label = "Squat";
-//                    break;
-//                case 6:
-//                    label = "Mountain Climber";
-//                    break;
-//                case 7:
-//                    label = "Bicycle Crunch";
-//                    break;
-//                case 8:
-//                    label = "Burpees";
-//                    break;
-//                case 9:
-//                    label = "Russian Twist";
-//                    break;
-//
-//
-//            }
-//            Log.i("Label: ", label);
-        }
-        else {
-            Toast.makeText(MainActivity.this, "Bitte Namen eingeben!", Toast.LENGTH_SHORT).show();
-        }
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,8 +82,63 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
         if (!mBluetoothAdapter.isEnabled()) {
             mBluetoothAdapter.enable();
-            Log.i("BT: ", "Bluetooth was succesfully started!");
+
         }
     }
+    private void stopBluetooth(){
+
+        if (mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+
+        if (mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.disable();
+
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.starteDatenerhebung:
+                probandenName = editText.getText().toString();
+
+                if (probandenName.length() > 0){
+                    if (mBluetoothAdapter.isEnabled()) {
+                        Intent intent = new Intent(v.getContext(), GetSensordatenActivity.class);
+                        startActivity(intent);
+                    }
+                    else {
+                        Toast.makeText(MainActivity.this, "WARTE AUF BLUETOOTH! BITTE GLEICH NOCHMAL KLICKEN!", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Bitte Namen eingeben!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case R.id.listButton:
+                probandenName = editText.getText().toString();
+
+                if (probandenName.length() > 0){
+                    if (mBluetoothAdapter.isEnabled()) {
+                        Intent intent = new Intent(v.getContext(), ChooseExerciseFromList.class);
+                        startActivity(intent);
+                    }
+                    else {
+                        Toast.makeText(MainActivity.this, "WARTE AUF BLUETOOTH! BITTE GLEICH NOCHMAL KLICKEN!", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Bitte Namen eingeben!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+
+
+
 }
 
