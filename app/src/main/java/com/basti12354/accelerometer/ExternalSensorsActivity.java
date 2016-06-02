@@ -166,7 +166,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
 
     @Override
-    public void onServiceDisconnected(ComponentName componentName) { }
+    public void onServiceDisconnected(ComponentName componentName) {
+        Log.e(LOG + " DISC ", "AUFGERUFEN!");
+    }
 
     // Konfiguriert den ACC Adapter -> Board muss übergeben werden, da diese für jedes Board einzeln erstellt und konfig. werden müssen!
     private void initializeAccExtern(MetaWearBoard metaWearBoard){
@@ -356,14 +358,26 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         if (isSensorConnected[0]){
             textViewSensor1.setBackgroundColor(Color.GREEN);
         }
+        else {
+            textViewSensor1.setBackgroundColor(Color.RED);
+        }
         if (isSensorConnected[1]){
             textViewSensor2.setBackgroundColor(Color.GREEN);
+        }
+        else {
+            textViewSensor2.setBackgroundColor(Color.RED);
         }
         if (isSensorConnected[2]){
             textViewSensor3.setBackgroundColor(Color.GREEN);
         }
+        else {
+            textViewSensor3.setBackgroundColor(Color.RED);
+        }
         if (isSensorConnected[3]){
             textViewSensor4.setBackgroundColor(Color.GREEN);
+        }
+        else {
+            textViewSensor4.setBackgroundColor(Color.RED);
         }
     }
 
@@ -378,37 +392,17 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                     .setHighIntensity((byte) 16).setLowIntensity((byte) 16)
                     .commit();
             ledModule.play(true);
-        } catch (UnsupportedModuleException e) {
+        }
+        catch (UnsupportedModuleException e) {
             e.printStackTrace();
         }
     }
 
-    // Zeigt den Zustand: DATENMESSUNG = BLAU
+    // Zeigt den Zustand: DATENMESSUNG = RED
     public void changeLEDColorToStateRUNNING(){
         for (int i = 0; i < metaWearBoards.size(); i++) {
             try {
                 Log.i(LOG, "Externe Sensoren LAUFEN!" + metaWearBoards.get(i));
-                Led ledModule = metaWearBoards.get(i).getModule(Led.class);
-
-                ledModule.stop(true);
-
-                ledModule.configureColorChannel(Led.ColorChannel.BLUE)
-                        .setRiseTime((short) 0).setPulseDuration((short) 1000)
-                        .setRepeatCount((byte) -1).setHighTime((short) 500)
-                        .setHighIntensity((byte) 16).setLowIntensity((byte) 16)
-                        .commit();
-                ledModule.play(true);
-            } catch (UnsupportedModuleException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    // Zeigt den Zustand: PAUSE = ROT
-    public void changeLEDColorToStatePAUSE(){
-        for (int i = 0; i < metaWearBoards.size(); i++) {
-            try {
-                Log.i(LOG, "Externe Sensoren werden PAUSIERT!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
 
                 ledModule.stop(true);
@@ -419,7 +413,46 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                         .setHighIntensity((byte) 16).setLowIntensity((byte) 16)
                         .commit();
                 ledModule.play(true);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+                metaWearBoards.remove(i);
+                accelerometerArrayList.remove(i);
+                gyroArrayList.remove(i);
+
+                isSensorConnected[i] = false;
+
             } catch (UnsupportedModuleException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Zeigt den Zustand: PAUSE = GRÜN
+    public void changeLEDColorToStatePAUSE(){
+        for (int i = 0; i < metaWearBoards.size(); i++) {
+            try {
+                Log.i(LOG, "Externe Sensoren werden PAUSIERT!" + metaWearBoards.get(i));
+                Led ledModule = metaWearBoards.get(i).getModule(Led.class);
+
+                ledModule.stop(true);
+
+                ledModule.configureColorChannel(Led.ColorChannel.GREEN)
+                        .setRiseTime((short) 0).setPulseDuration((short) 1000)
+                        .setRepeatCount((byte) -1).setHighTime((short) 500)
+                        .setHighIntensity((byte) 16).setLowIntensity((byte) 16)
+                        .commit();
+                ledModule.play(true);
+            }
+            catch (NullPointerException e) {
+                e.printStackTrace();
+                metaWearBoards.remove(i);
+                accelerometerArrayList.remove(i);
+                gyroArrayList.remove(i);
+
+                isSensorConnected[i] = false;
+
+            }
+            catch (UnsupportedModuleException e) {
                 e.printStackTrace();
             }
         }

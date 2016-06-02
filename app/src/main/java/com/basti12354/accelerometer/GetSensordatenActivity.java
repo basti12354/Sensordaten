@@ -241,6 +241,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         }
         stopSensors();
 
+        AndroidSensorsActivity.aktuellerSatz = 1;
 
         finish();
         Intent intent  = new Intent(this, MainActivity.class);
