@@ -21,6 +21,9 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
+// Activity dient als Startpunkt -> Übung kann über Liste ausgewählt werden oder man durchläuft den Trainingsplan
+// Name des Probanden MUSS eingegeben werden bevor es weitergeht
+// Bluetooth wird gestartet! -> für externe Sensoren von Bedeutung!
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private EditText editText;

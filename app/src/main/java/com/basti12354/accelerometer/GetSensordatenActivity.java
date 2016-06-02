@@ -26,7 +26,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
     // 30000 entspricht 30 Sekunden
     long pauseDuration = 30000l;
-    long pauseBetweenDifferentExercises = 60000l;
+
     Timer pauseTimer;
     Thread t;
 
@@ -88,19 +88,17 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
                         // Ändert das Label für die nächste Übung
                         setExerciseLabelAndPlaySoundNextExercise();
 
-
-
                         changeLEDColorToStatePAUSE();
 
+
+                        // Zurück zur MAIN-Activity wenn Übung 3 Mal gemacht wurde!
                         if (AndroidSensorsActivity.aktuellerSatz == 3) {
                             AndroidSensorsActivity.aktuellerSatz = 1;
-                            // Pause zwischen verschiedenen Übungen dauert länger
-                           // pauseTimer = new ExampleTimer(1000l, pauseBetweenDifferentExercises);
 
-                            // Zurück zur MAIN-Activity wenn Übung 3 Mal gemacht wurde!
                             backToMainActivity();
 
                         }
+                        // Übung noch keine 3 Mal gemacht -> Pause-Timer gestartet und Übung muss nach diesem Timer noch einmal gemacht werden!
                         else {
                             // Erhöhe den Zähler um eins!
                             AndroidSensorsActivity.aktuellerSatz = AndroidSensorsActivity.aktuellerSatz + 1;
@@ -115,6 +113,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
                         //printArrayList();
                     }
+                    // Die gemacht Übung war die LETZTE ÜBUNG auf der Liste -> Sensoren werden gestoppt und geschlossen -> über normale Navigaiotn
                     else if (choosenExercise == 8){
 
                             startBtn.setText("AUFNAHME BEENDET!");

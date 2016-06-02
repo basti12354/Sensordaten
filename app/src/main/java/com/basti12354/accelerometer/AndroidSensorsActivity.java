@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
- * Created by Basti on 13.04.2016.
+ * KLASSE kümmert sich um alle Sensoren des SMARTPHONES
  */
 public class AndroidSensorsActivity extends ExternalSensorsActivity implements SensorEventListener {
 
@@ -86,15 +86,13 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     // Intervalldinge um in regelmäßigen Abständen zu speichern
     private android.os.Handler mHandler;
     private boolean timerIsRunning = false;
-    // Intervall in welcher Zeit xy aufgerufen wird.
+
+    // ################### Intervall in welcher Zeit xy aufgerufen wird. ##########################
     private int mInterval = 10; // jede 10 ms! = 100 Hz  -> 20 ms wären 50 Hz
 
 
     // TextView Satzzähler
     public static int aktuellerSatz = 1;
-
-    // Variablen zum Abspeichern der Daten für Machine Learning und Qualitätsmaß
-    private String data4MachineLearning = "", data4QualityMeasure = "";
 
 
     @Override
@@ -223,10 +221,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         switch (event.sensor.getType()) {
             //######### Accelerometer #############
             case Sensor.TYPE_ACCELEROMETER:
-                // clean current values
-               // displayCleanValues();
-                // display the current x,y,z accelerometer values
-               // displayCurrentValues();
+
 
                 deltaX = event.values[0];
                 deltaY = event.values[1];
@@ -250,10 +245,6 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
                 gyroY = event.values[1];
                 gyroZ = event.values[2];
 
-//                // Zeige Änderungen auf Display
-//                currentGyroX.setText(Float.toString(gyroX));
-//                currentGyroY.setText(Float.toString(gyroY));
-//                currentGyroZ.setText(Float.toString(gyroZ));
 
             break;
 
@@ -292,19 +283,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
     }
 
-//    public void displayCleanValues() {
-//        currentX.setText("0.0");
-//        currentY.setText("0.0");
-//        currentZ.setText("0.0");
-//    }
-//
-//    // display the current x,y,z accelerometer values
-//    public void displayCurrentValues() {
-//        currentX.setText(Float.toString(deltaX));
-//        currentY.setText(Float.toString(deltaY));
-//        currentZ.setText(Float.toString(deltaZ));
-//    }
 
+    // Fügt dem Array einen neuen EIntrag hinzu -> wird im Thread alle x-Millisekungen aufgerufen!
     private void saveSensorDataAndActualTimeToArray(){
 
 
@@ -347,6 +327,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 //                "Orientation Z (Yaw) :"+ Float.toString(gyroZ));
     }
 
+    // Speichert die Arrayliste als File und erstellt eine Ordnerstruktur auf dem Smartphone
+    //            /Sensordaten/NAME-PROBAND/
     public void save(String fileName){
         File folder = new File(path);
         Log.d("Pfad", path);
@@ -408,15 +390,15 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         }
     }
 
-    // ######### Starte die Sensoren und speichere Werte alle ... ms in Arraylist!
+    // ######### Starte die Sensoren (auch die externen) und speichere Werte alle ... ms in Arraylist!
     public void startSensors(){
 
         getAllDataFromExternalSensors();
 
-//        mHandler = new android.os.Handler();
-//
-//        startRepeatingTask();
-//        timerIsRunning = true;
+        mHandler = new android.os.Handler();
+
+        startRepeatingTask();
+        timerIsRunning = true;
 
 
     }
@@ -425,15 +407,14 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         @Override
         public void run() {
             try {
+                // Ändert die Farben der TextViews je nach verbundenen EXTERNEN Sensoren
                 changeColorOfTextViews();
-
 
                 // Speichere die aktuellen Daten zur Arraylist
                 saveSensorDataAndActualTimeToArray();
 
             } finally {
-                // 100% guarantee that this always happens, even if
-                // your update method throws an exception
+                // Ruft die Methode nach Ausführung erneut auf
                 mHandler.postDelayed(mStatusChecker, mInterval);
             }
         }
@@ -444,6 +425,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     }
 
 
+    // Thread wird gestoppt
+    // Gesammelten Daten werden als File abgespeichert
     public void stopSensors() {
         if (timerIsRunning) {
             mHandler.removeCallbacks(mStatusChecker);
@@ -473,9 +456,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     }
 
 
-
-
-
+    // Ändert die Anzeige der aktuellen Übung
+    // Spielt außerdem ein Soundfile ab -> "Nächste ÜBUNG ...."
     public void setExerciseLabelAndPlaySoundNextExercise(){
         switch (choosenExercise){
             case 0:
@@ -567,22 +549,6 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         });
 
 
-    }
-
-    private void fillArraylistWithMachineLearningAttributes(){
-        data4MachineLearning =  "@RELATION fitness              \n" +
-                "                                \n" +
-                "@ATTRIBUTE translate_xAxis REAL \n" +
-                "@ATTRIBUTE translate_yAxis REAL \n" +
-                "@ATTRIBUTE translate_zAxis REAL \n" +
-                "@ATTRIBUTE rotate_xAxis REAL    \n" +
-                "@ATTRIBUTE rotate_yAxis REAL    \n" +
-                "@ATTRIBUTE rotate_zAxis REAL    \n" +
-                "@ATTRIBUTE class {Crunch, Ausfallschritt, Hampelmann, Bicycle Crunch, Kniebeugen, Bergsteiger, Russian Twist, Liegestuetz} \n" +
-                "                                \n" +
-                "@data                           \n";
-
-        sensorData.add(data4MachineLearning);
     }
 
 
