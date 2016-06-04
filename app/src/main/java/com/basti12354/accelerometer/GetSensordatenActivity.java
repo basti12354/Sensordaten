@@ -25,7 +25,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
     Boolean firstStart = true;
 
     // 30000 entspricht 30 Sekunden
-    long pauseDuration = 30000l;
+    long pauseDuration = 10000l;
 
     Timer pauseTimer;
     Thread t;
@@ -74,13 +74,19 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
                     // Ändere die LEDs der verbundenen Sensoren -> damit Verbindungsfehler gezeigt werden können!
                     changeLEDColorToStateRUNNING();
 
+                    // STARTE STREAMING DER EXTERNEN
+                    getAllDataFromExternalSensors();
+
                     firstStart = false;
                 }
 
                 // Sensoren laufen gerade und werden nun pausiert!
                 else {
+                   // Log.i(LOG + "SAVE", "Button geklicked OBEN");
                     if (paused == false && choosenExercise != 8) {
                         startBtn.setText("PAUSE...");
+
+                      //  Log.i(LOG + "SAVE", "Button geklicked");
 
                         // Speichert die Arrayliste mit Daten ab. Muss vor der Erhöhung des Zählers geschehen!
                         stopSensors();

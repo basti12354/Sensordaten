@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,9 @@ import com.mbientlab.metawear.data.CartesianFloat;
 import com.mbientlab.metawear.module.*;
 import com.mbientlab.metawear.module.Accelerometer;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -60,7 +64,17 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     public final String LOG = "Externe Sensoren";
 
     // Variable muss je nach ANZAHL der Sensoren geändert werden; 2 enstpricht hierbei 2 Sensoren, 4 -> 4...
-    private int anzahl_der_externen_sensoren = 2;
+    private int anzahl_der_externen_sensoren = 4;
+
+    //
+    final float data_stream_rate = 40.0f;
+
+    // Überprüfe die Frequenz
+    private ArrayList<Long> accTimestamp1 = new ArrayList<>(), accTimestamp2 = new ArrayList<>(), accTimestamp3 = new ArrayList<>(), accTimestamp4 = new ArrayList<>();
+    private ArrayList<Long> gyroTimestamp1 = new ArrayList<>(), gyroTimestamp2 = new ArrayList<>(), gyroTimestamp3 = new ArrayList<>(), gyroTimestamp4 = new ArrayList<>();
+    private ArrayList<String> frequency = new ArrayList<>();
+    // Speicherplatz auf Gerät
+    public String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sensordaten";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,12 +112,16 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
          Log.i(LOG, "Service Bind2" );
 
         // MAC Adressen der externen Sensoren
-        final String mwMacAddress = "D1:C4:AA:BF:0B:22";
+        final String mwMacAddress  = "D1:C4:AA:BF:0B:22";
         final String mwMacAddress2 = "C6:9E:B6:91:A5:F7";
+        final String mwMacAddress3 = "CF:E0:DA:D2:B3:D8";
+        final String mwMacAddress4 = "EE:BA:5C:F4:EB:EC";
 
         final ArrayList<String> macAdressen = new ArrayList<String>();
         macAdressen.add(mwMacAddress);
         macAdressen.add(mwMacAddress2);
+        macAdressen.add(mwMacAddress3);
+        macAdressen.add(mwMacAddress4);
 
         BluetoothManager btManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
 
@@ -152,6 +170,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 //                    isSensorConnected[numberOfConnectedDevices] = false;
 
                  //   metaWearBoard.connect();
+                    isSensorConnected[numberOfConnectedDevices] = false;
                 }
             });
 
@@ -180,8 +199,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 // Set the sampling frequency to 50Hz, or closest valid ODR
                 accelerometer.configureAxisSampling()
                         .setFullScaleRange(Bmi160Accelerometer.AccRange.AR_4G)
-                        .setOutputDataRate(Bmi160Accelerometer.OutputDataRate.ODR_50_HZ)
+                       // .setOutputDataRate(Bmi160Accelerometer.OutputDataRate.ODR_50_HZ)
                         .commit();
+                accelerometer.setOutputDataRate(data_stream_rate);
                 // enable axis sampling
                 accelerometer.enableAxisSampling();
                 // Switch the accelerometer to active mode
@@ -190,7 +210,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
 
                 accelerometerArrayList.add(accelerometer);
-                Log.i(LOG, "Externe-ACC Sensoren GESTARTET " + "Size: " + accelerometerArrayList.size());
+                Log.i(LOG, "Externe-ACC Sensoren GESTARTET " + "Aktuelle Anzahl: " + accelerometerArrayList.size());
             }
 
 
@@ -202,7 +222,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
     // Konfiguriert den GYRO Adapter -> Board muss übergeben werden, da diese für jedes Board einzeln erstellt und konfig. werden müssen!
     private void initializeGyroExtern(MetaWearBoard metaWearBoard) {
-        Log.i(LOG, "Starte ExterneGYRO Sensoren");
+       // Log.i(LOG, "Starte ExterneGYRO Sensoren");
 
             try {
                 Bmi160Gyro bmi160Gyro = metaWearBoard.getModule(Bmi160Gyro.class);
@@ -210,11 +230,12 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
                 bmi160Gyro.configure()
                         .setFullScaleRange(Bmi160Gyro.FullScaleRange.FSR_2000)
-                        .setOutputDataRate(Bmi160Gyro.OutputDataRate.ODR_50_HZ)
+                       // .setOutputDataRate(Bmi160Gyro.OutputDataRate.ODR_50_HZ)
                         .commit();
+                bmi160Gyro.setOutputDataRate(data_stream_rate);
                 bmi160Gyro.start();
 
-                Log.i(LOG, "Externe-GYRO Sensoren GESTARTET");
+              //  Log.i(LOG, "Externe-GYRO Sensoren GESTARTET");
 
                 gyroArrayList.add(bmi160Gyro);
             }
@@ -267,8 +288,14 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                         public void process(Message message) {
                             CartesianFloat axes = message.getData(CartesianFloat.class);
                            //   Log.i("STREAM", message.getData(CartesianFloat.class).toString());
+
+                            Long tsLong = System.currentTimeMillis();
+
                             switch (arrayListSize) {
                                 case 0:
+                                    // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
+                                    accTimestamp1.add(tsLong);
+
                                  //   Log.i(LOG, "1. ACC");
                                     extAccX = axes.x();
                                     extAccY = axes.y();
@@ -276,17 +303,26 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                                //     Log.i("STREAM ", "X-WERT ACC: " + extAccX);
                                     break;
                                 case 1:
+                                    // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
+                                    accTimestamp2.add(tsLong);
+
                                   //  Log.i(LOG, "2. ACC");
                                     extAccX2 = axes.x();
                                     extAccY2 = axes.y();
                                     extAccZ2 = axes.z();
                                     break;
                                 case 2:
+                                    // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
+                                    accTimestamp3.add(tsLong);
+
                                     extAccX3 = axes.x();
                                     extAccY3 = axes.y();
                                     extAccZ3 = axes.z();
                                     break;
                                 case 3:
+                                    // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
+                                    accTimestamp4.add(tsLong);
+
                                     extAccX4 = axes.x();
                                     extAccY4 = axes.y();
                                     extAccZ4 = axes.z();
@@ -313,24 +349,35 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                             CartesianFloat axes = message.getData(CartesianFloat.class);
                          //   Log.i("STREAM " + gyroDataTransferString[arrayListSize], message.getData(CartesianFloat.class).toString());
 
+                            Long tsLong = System.currentTimeMillis();
+
                             switch (arrayListSize){
                                 case 0:
+                                    // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
+                                    gyroTimestamp1.add(tsLong);
+
                                     extGyroX = axes.x();
                                     extGyroY = axes.y();
                                     extGyroZ = axes.z();
                               //      Log.i("STREAM ", "X-WERT GYRO: " + extGyroX);
                                     break;
                                 case 1:
+                                    gyroTimestamp2.add(tsLong);
+
                                     extGyroX2 = axes.x();
                                     extGyroY2 = axes.y();
                                     extGyroX2 = axes.z();
                                     break;
                                 case 2:
+                                    gyroTimestamp3.add(tsLong);
+
                                     extGyroX3 = axes.x();
                                     extGyroY3 = axes.y();
                                     extGyroX3 = axes.z();
                                     break;
                                 case 3:
+                                    gyroTimestamp4.add(tsLong);
+
                                     extGyroX4 = axes.x();
                                     extGyroY4 = axes.y();
                                     extGyroX4 = axes.z();
@@ -462,9 +509,9 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     // Schließt die Verbindungen zu den externen Sensoren!
     // Muss unbedingt aufgerufen werden, da sonst die Verbindung zu den Sensoren nur durch Reset (Batterie raus/rein)
     public void closeExternalSensors(){
-        Log.i(LOG, "Externe Sensoren werden deaktiviert!");
+       // Log.i(LOG, "Externe Sensoren werden deaktiviert!");
         for (int i = 0; i < metaWearBoards.size(); i++) {
-            Log.i(LOG, "1.Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
+           // Log.i(LOG, "1.Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
             try {
 
                 // Stoppe Accelerometer
@@ -474,7 +521,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 // Stoppe Gyroscop
                 gyroArrayList.get(i).stop();
 
-                Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
+             //   Log.i(LOG, "Externe Sensoren werden deaktiviert!" + metaWearBoards.get(i));
                 Led ledModule = metaWearBoards.get(i).getModule(Led.class);
                 ledModule.play(false);
                 ledModule.stop(true);
@@ -534,6 +581,98 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
             Log.i(LOG+"RESTART", "Externe Sensoren RESTARTET");
         }
 
+    }
+
+    public void calculateFrequencyOfExternalSensors(){
+        String returnString = GetSensordatenActivity.label;
+
+//        // erstelle zwei Arrays für die Berechnung
+        ArrayList<ArrayList<Long>> accTimestamp = new ArrayList<>();
+        accTimestamp.add(accTimestamp1);
+        accTimestamp.add(accTimestamp2);
+        accTimestamp.add(accTimestamp3);
+        accTimestamp.add(accTimestamp4);
+
+        ArrayList<ArrayList<Long>> gyroTimestamp = new ArrayList<>();
+        gyroTimestamp.add(gyroTimestamp1);
+        gyroTimestamp.add(gyroTimestamp2);
+        gyroTimestamp.add(gyroTimestamp3);
+        gyroTimestamp.add(gyroTimestamp4);
+
+        for (int j = 0; j < accTimestamp.size(); j++){
+            long abstand = 0;
+            double milliseconds = 0;
+            for (int i = 0; i < accTimestamp.get(j).size() - 1; i++) {
+
+                long aktuellerAbstand = accTimestamp.get(j).get(i + 1) - accTimestamp.get(j).get(i);
+                //   Log.i(LOG+"Abstand", "Aktuell: " + j);
+                abstand = abstand + aktuellerAbstand;
+                //   Log.i(LOG+"Abstand", "Abstand: " + abstand + " ZAHL " + i + " OBJEKT " );
+            }
+            if (accTimestamp.get(j).size() > 0) {
+                milliseconds = (double) abstand / accTimestamp.get(j).size();
+            }
+            //  Log.i(LOG+"Abstand", "Milliseconds: " + milliseconds + " ; Abstand " + abstand + " ; Size: " + accTimestamp1.size());
+            double frequency = 1000f / milliseconds;
+            //   Log.i(LOG+"Abstand", "Frequenz: " + frequency);
+            returnString = returnString + " ACC-Sensor" + j + " " + frequency + "; ";
+        }
+        for (int j = 0; j < gyroTimestamp.size(); j++){
+            long abstand = 0;
+            double milliseconds = 0;
+            for (int i = 0; i < gyroTimestamp.get(j).size() - 1; i++) {
+
+                long aktuellerAbstand = gyroTimestamp.get(j).get(i + 1) - gyroTimestamp.get(j).get(i);
+                //   Log.i(LOG+"Abstand", "Aktuell: " + j);
+                abstand = abstand + aktuellerAbstand;
+                //   Log.i(LOG+"Abstand", "Abstand: " + abstand + " ZAHL " + i + " OBJEKT " );
+            }
+            if (gyroTimestamp.get(j).size() > 0) {
+                milliseconds = (double) abstand / gyroTimestamp.get(j).size();
+            }
+            //  Log.i(LOG+"Abstand", "Milliseconds: " + milliseconds + " ; Abstand " + abstand + " ; Size: " + accTimestamp1.size());
+            double frequency = 1000f / milliseconds;
+            //   Log.i(LOG+"Abstand", "Frequenz: " + frequency);
+            returnString = returnString + "Gyro-Sensor" + j + " " + frequency + "; ";
+        }
+
+      //  Log.i(LOG+"FREQ", returnString);
+
+
+
+        accTimestamp1.clear();
+        accTimestamp2.clear();
+        accTimestamp3.clear();
+        accTimestamp4.clear();
+        gyroTimestamp1.clear();
+        gyroTimestamp2.clear();
+        gyroTimestamp3.clear();
+        gyroTimestamp4.clear();
+
+
+        frequency.add(returnString);
+    }
+
+
+    public void saveFrequencyListToTxt(){
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(new FileWriter(path + "/" + MainActivity.probandenName + "/FREQUENZ.txt", true));
+            for (String text : frequency) {
+                out.println(text);
+            }
+        } catch (IOException e) {
+            System.err.println("Caught IOException: " +  e.getMessage());
+
+        } finally {
+            if (out != null) {
+                out.close();
+                frequency.clear();
+
+                // Löscht die Arrayliste, damit die Daten nicht doppelt gespeichert werden
+             //   frequency.clear();
+            }
+        }
     }
 
 

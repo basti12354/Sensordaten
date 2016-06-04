@@ -4,8 +4,10 @@ package com.basti12354.accelerometer;
  * Created by Basti on 23.03.2016.
  */
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,7 +29,7 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     private EditText editText;
-    public static String probandenName;
+    public static String probandenName = "Basti";
 
 
 
@@ -50,6 +52,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         chooseExerciseFromList.setOnClickListener(this);
 
         editText = (EditText) findViewById(R.id.editText);
+        editText.setText(probandenName);
 
         Switch aSwitch = (Switch) findViewById(R.id.switch1);
 
@@ -108,6 +111,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 if (probandenName.length() > 0){
                     if (mBluetoothAdapter.isEnabled()) {
+                        finish();
                         Intent intent = new Intent(v.getContext(), GetSensordatenActivity.class);
                         startActivity(intent);
                     }
@@ -140,6 +144,36 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
         }
     }
+
+    @Override
+    public void onBackPressed() {
+
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("APP beenden?");
+            alertDialogBuilder.setMessage("Beenden?");
+
+            //Dialog Buttons
+            alertDialogBuilder.setPositiveButton("Jo!!!!!!", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+
+                    MainActivity.super.onBackPressed();
+
+                }
+            });
+
+            alertDialogBuilder.setNegativeButton("NOPE!", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface arg0, int arg1) {
+
+
+                }
+            });
+            alertDialogBuilder.show();
+        }
 
 
 

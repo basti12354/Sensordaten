@@ -292,10 +292,10 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         Long tsLong = System.currentTimeMillis();
         String timestamp = tsLong.toString();
 
-        Log.i( LOG + " DATEN", timestamp + ": ACC1: " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
-                + ",  ACC2: " + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
-                + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
-                + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2));
+//        Log.i( LOG + " DATEN", timestamp + ": ACC1: " +  Float.toString(ExternalSensorsActivity.extAccX)+ "," + Float.toString(ExternalSensorsActivity.extAccY)+ "," + Float.toString(ExternalSensorsActivity.extAccZ)
+//                + ",  ACC2: " + Float.toString(ExternalSensorsActivity.extAccX2)+ "," + Float.toString(ExternalSensorsActivity.extAccY2)+ "," + Float.toString(ExternalSensorsActivity.extAccZ2)
+//                + "," + Float.toString(ExternalSensorsActivity.extGyroX)+ "," + Float.toString(ExternalSensorsActivity.extGyroY)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ)
+//                + "," + Float.toString(ExternalSensorsActivity.extGyroX2)+ "," + Float.toString(ExternalSensorsActivity.extGyroY2)+ "," + Float.toString(ExternalSensorsActivity.extGyroZ2));
 
       //  Log.i( LOG + " Array:", label);
                 sensorData.add(label  + "," + aktuellerSatz + "," + timestamp + "," + Float.toString(deltaX) + "," + Float.toString(deltaY) + "," + Float.toString(deltaZ)
@@ -330,6 +330,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     // Speichert die Arrayliste als File und erstellt eine Ordnerstruktur auf dem Smartphone
     //            /Sensordaten/NAME-PROBAND/
     public void save(String fileName){
+        Log.i(LOG + "SAVE", "Übung gestoppt");
         File folder = new File(path);
         Log.d("Pfad", path);
         if (!folder.exists()){
@@ -379,6 +380,11 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
 
                 // Löscht die Arrayliste, damit die Daten nicht doppelt gespeichert werden
                 sensorData.clear();
+
+                // Speichere am Ende noch die Frequenz als FILE
+                // Speicherplatz auf Gerät
+                saveFrequencyListToTxt();
+
             }
         }
 
@@ -390,15 +396,15 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         }
     }
 
-    // ######### Starte die Sensoren (auch die externen) und speichere Werte alle ... ms in Arraylist!
+    // ######### Starte die Sensoren und speichere Werte alle ... ms in Arraylist!
     public void startSensors(){
 
-        getAllDataFromExternalSensors();
+        timerIsRunning = true;
 
         mHandler = new android.os.Handler();
 
         startRepeatingTask();
-        timerIsRunning = true;
+
 
 
     }
@@ -428,10 +434,16 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     // Thread wird gestoppt
     // Gesammelten Daten werden als File abgespeichert
     public void stopSensors() {
+      //  Log.i(LOG + "SAVE", "Stop oben");
+
         if (timerIsRunning) {
             mHandler.removeCallbacks(mStatusChecker);
             timerIsRunning = false;
 
+          //  Log.i(LOG + "SAVE", "Stop unten");
+
+            // Frequenzberechnung
+            calculateFrequencyOfExternalSensors();
 
             SimpleDateFormat dfDate = new SimpleDateFormat("dd-MM_HH-mm-ss");
             String data = "";
@@ -441,6 +453,8 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
             String speicherName = MainActivity.probandenName + "_" + label + "_" + aktuellerSatz + "_" + datum;
 
             save(speicherName);
+
+
         }
 
     }
