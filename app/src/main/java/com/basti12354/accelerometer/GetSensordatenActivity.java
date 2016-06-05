@@ -25,7 +25,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
     Boolean firstStart = true;
 
     // 30000 entspricht 30 Sekunden
-    long pauseDuration = 10000l;
+    long pauseDuration = 30000l;
 
     Timer pauseTimer;
     Thread t;
@@ -147,6 +147,9 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
     private void startPauseTimer(){
         // Setze Boolean um ein Klicken auf den PAUSE BTN zu verhindern
         paused = true;
+
+        // starte AUDIO -> "In 5 Sekunden gehts weiter"
+        playPauseSound();
 
         //Start the timer.
         pauseTimer.start();

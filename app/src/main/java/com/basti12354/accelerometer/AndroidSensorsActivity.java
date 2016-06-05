@@ -34,7 +34,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
     public static int choosenExercise = 0;
     public static String label = "Crunch"; // Erste Übung Crunch -> für Benennung des Btn bereits hier instantiiert!
     private int nextExerciseAudio;
-    private MediaPlayer mp;
+    private MediaPlayer mp, pause;
 
 
     public SensorManager sensorManager;
@@ -536,6 +536,7 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
         TextView uebung = (TextView) findViewById(R.id.exerciseName);
         uebung.setText(label);
 
+
     }
 
     private void playNextExerciseSound() {
@@ -562,6 +563,29 @@ public class AndroidSensorsActivity extends ExternalSensorsActivity implements S
             }
         });
 
+
+    }
+
+    protected void playPauseSound() {
+
+        pause = MediaPlayer.create(getBaseContext(), R.raw.pause30);
+        pause.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+
+                pause.start();
+
+            }
+        });
+        pause.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+
+                pause.reset();
+                pause.release();
+
+            }
+        });
 
     }
 
