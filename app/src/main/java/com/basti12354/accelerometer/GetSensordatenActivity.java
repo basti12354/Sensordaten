@@ -40,6 +40,9 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
 
         intitializeSmartphoneSensors();
 
+        // Setzte die statischen Variablen EXTERNE SENSOREN zurück zu 0, damit keine alten Werte von vorherigen Messungen übernommen werden
+        setStaticVariablesToZero();
+
         // Wird beim ersten Start der Activity hier ausgeführt -> danach sobald der Pause Btn gedrückt wird
         setExerciseLabelAndPlaySoundNextExercise();
 
@@ -207,19 +210,23 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         v.vibrate(1000);
 
 
-        // es müssen noch weitere Übungen aufgenommen werden!
+        // Unnütze Daten werden aus den Listen für Frequenzberechnung gelöscht!
+        clearFrequencyListAfterPause();
 
-            // Nach VIBRATION werden die Sensoren wieder gestartet!
-            startSensors();
+        // Setzte die statischen Variablen EXTERNE SENSOREN zurück zu 0, damit keine alten Werte von vorherigen Messungen übernommen werden
+        setStaticVariablesToZero();
 
-            startBtn.setText("STOP!");
+        // Nach VIBRATION werden die Sensoren wieder gestartet!
+        startSensors();
+
+        startBtn.setText("STOP!");
 
     }
 
 
     @Override
     public void onBackPressed() {
-        Log.i(LOG, "Return Taste");
+       // Log.i(LOG, "Return Taste");
 
         backToMainActivity();
 
@@ -230,7 +237,7 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
         switch (item.getItemId()) {
 
             case android.R.id.home:
-                Log.i(LOG, "Return Menü");
+                //Log.i(LOG, "Return Menü");
 
                 backToMainActivity();
 
@@ -249,6 +256,9 @@ public class GetSensordatenActivity extends AndroidSensorsActivity implements Vi
             pauseTimer.cancel();
         }
         stopSensors();
+
+        // Unnütze Daten werden aus den Listen für Frequenzberechnung gelöscht!
+        clearFrequencyListAfterPause();
 
         AndroidSensorsActivity.aktuellerSatz = 1;
 

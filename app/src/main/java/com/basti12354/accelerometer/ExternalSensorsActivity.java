@@ -76,6 +76,13 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     // Speicherplatz auf Gerät
     public String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Sensordaten";
 
+    // MAC Adressen der externen Sensoren
+    final String mwMacAddress  = "D1:C4:AA:BF:0B:22";
+    final String mwMacAddress2 = "C6:9E:B6:91:A5:F7";
+    final String mwMacAddress3 = "CF:E0:DA:D2:B3:D8";
+    final String mwMacAddress4 = "EE:BA:5C:F4:EB:EC";
+    private ArrayList<String> macAdressen = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,11 +118,6 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
          Log.i(LOG, "Service Bind2" );
 
-        // MAC Adressen der externen Sensoren
-        final String mwMacAddress  = "D1:C4:AA:BF:0B:22";
-        final String mwMacAddress2 = "C6:9E:B6:91:A5:F7";
-        final String mwMacAddress3 = "CF:E0:DA:D2:B3:D8";
-        final String mwMacAddress4 = "EE:BA:5C:F4:EB:EC";
 
         final ArrayList<String> macAdressen = new ArrayList<String>();
         macAdressen.add(mwMacAddress);
@@ -146,8 +148,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
                     connectedSensorLED(metaWearBoard);
 
-                    initializeAccExtern(metaWearBoard);
+                    initializeAccExtern(metaWearBoard, kopieDerMacAdresse.get(numberOfConnectedDevices) );
                     initializeGyroExtern(metaWearBoard);
+
+
 
                     isSensorConnected[numberOfConnectedDevices] = true;
 
@@ -161,7 +165,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
                 @Override
                 public void failure(int status, Throwable error) {
-                    Log.e(LOG, "Error connecting", error);
+                    Log.e(LOG, "Error connecting" + macAdressen.get(numberOfConnectedDevices), error);
                    // Toast.makeText(getBaseContext(), "EXTERNE Sensoren NICHT richtig verbunden!", Toast.LENGTH_SHORT).show();
 //                    metaWearBoards.remove(numberOfConnectedDevices);
 //
@@ -190,7 +194,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
     }
 
     // Konfiguriert den ACC Adapter -> Board muss übergeben werden, da diese für jedes Board einzeln erstellt und konfig. werden müssen!
-    private void initializeAccExtern(MetaWearBoard metaWearBoard){
+    private void initializeAccExtern(MetaWearBoard metaWearBoard, String macAdresse){
 
             try {
 
@@ -207,7 +211,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                 // Switch the accelerometer to active mode
                 accelerometer.start();
 
-
+                macAdressen.add(macAdresse);
 
                 accelerometerArrayList.add(accelerometer);
                 Log.i(LOG, "Externe-ACC Sensoren GESTARTET " + "Aktuelle Anzahl: " + accelerometerArrayList.size());
@@ -291,8 +295,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
 
                             Long tsLong = System.currentTimeMillis();
 
-                            switch (arrayListSize) {
-                                case 0:
+                            String aktuelleMacAdresse = macAdressen.get(arrayListSize);
+
+                            switch (aktuelleMacAdresse) {
+                                case mwMacAddress:
                                     // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
                                     accTimestamp1.add(tsLong);
 
@@ -302,7 +308,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                                     extAccZ = axes.z();
                                //     Log.i("STREAM ", "X-WERT ACC: " + extAccX);
                                     break;
-                                case 1:
+                                case mwMacAddress2:
                                     // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
                                     accTimestamp2.add(tsLong);
 
@@ -311,7 +317,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                                     extAccY2 = axes.y();
                                     extAccZ2 = axes.z();
                                     break;
-                                case 2:
+                                case mwMacAddress3:
                                     // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
                                     accTimestamp3.add(tsLong);
 
@@ -319,7 +325,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                                     extAccY3 = axes.y();
                                     extAccZ3 = axes.z();
                                     break;
-                                case 3:
+                                case mwMacAddress4:
                                     // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
                                     accTimestamp4.add(tsLong);
 
@@ -350,9 +356,10 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                          //   Log.i("STREAM " + gyroDataTransferString[arrayListSize], message.getData(CartesianFloat.class).toString());
 
                             Long tsLong = System.currentTimeMillis();
+                            String aktuelleMacAdresse = macAdressen.get(arrayListSize);
 
-                            switch (arrayListSize){
-                                case 0:
+                            switch (aktuelleMacAdresse){
+                                case mwMacAddress:
                                     // Aktuellen Timestamp zur Liste hinzufügen für Berechnung der Frequenz
                                     gyroTimestamp1.add(tsLong);
 
@@ -361,26 +368,26 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
                                     extGyroZ = axes.z();
                               //      Log.i("STREAM ", "X-WERT GYRO: " + extGyroX);
                                     break;
-                                case 1:
+                                case mwMacAddress2:
                                     gyroTimestamp2.add(tsLong);
 
                                     extGyroX2 = axes.x();
                                     extGyroY2 = axes.y();
-                                    extGyroX2 = axes.z();
+                                    extGyroZ2 = axes.z();
                                     break;
-                                case 2:
+                                case mwMacAddress3:
                                     gyroTimestamp3.add(tsLong);
 
                                     extGyroX3 = axes.x();
                                     extGyroY3 = axes.y();
-                                    extGyroX3 = axes.z();
+                                    extGyroZ3 = axes.z();
                                     break;
-                                case 3:
+                                case mwMacAddress4:
                                     gyroTimestamp4.add(tsLong);
 
                                     extGyroX4 = axes.x();
                                     extGyroY4 = axes.y();
-                                    extGyroX4 = axes.z();
+                                    extGyroZ4 = axes.z();
                                     break;
                             }
 
@@ -532,6 +539,7 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         gyroArrayList = new ArrayList<>();
         accelerometerArrayList = new ArrayList<>();
         metaWearBoards = new ArrayList<>();
+        macAdressen.clear();
 
 
     }
@@ -653,6 +661,17 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
         frequency.add(returnString);
     }
 
+    public void clearFrequencyListAfterPause(){
+        accTimestamp1.clear();
+        accTimestamp2.clear();
+        accTimestamp3.clear();
+        accTimestamp4.clear();
+        gyroTimestamp1.clear();
+        gyroTimestamp2.clear();
+        gyroTimestamp3.clear();
+        gyroTimestamp4.clear();
+    }
+
 
     public void saveFrequencyListToTxt(){
         PrintWriter out = null;
@@ -673,6 +692,15 @@ public class ExternalSensorsActivity extends AppCompatActivity implements Servic
              //   frequency.clear();
             }
         }
+    }
+
+
+    // Setzt die statischen Variablen immer wieder zurück, damit keine alten Werte übernommen werden
+    public void setStaticVariablesToZero(){
+        extAccX = 0; extAccY = 0; extAccZ = 0; extAccX2 = 0; extAccY2 = 0; extAccZ2 = 0;
+        extAccX3 = 0; extAccY3 = 0; extAccZ3 = 0; extAccX4 = 0; extAccY4 = 0; extAccZ4 = 0;
+        extGyroX = 0; extGyroY = 0; extGyroZ = 0; extGyroX2 = 0; extGyroY2 = 0; extGyroZ2 = 0;
+        extGyroX3 = 0; extGyroY3 = 0; extGyroZ3 = 0; extGyroX4 = 0; extGyroY4 = 0; extGyroZ4 = 0;
     }
 
 
